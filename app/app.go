@@ -73,13 +73,17 @@ func (app *App) handleEvent(e sdl.Event) {
 	case *sdl.JoyButtonEvent:
 		event := e.(*sdl.JoyButtonEvent)
 		if event.State == sdl.PRESSED {
-			if event.Button == 0 {
+			if event.Button == 0x0 {
 				app.testRect.X = 0
 				app.testRect.Y = 0
 			}
 
 			if event.Button == 0x8 {
 				app.running = false
+			}
+
+			if event.Button == 0x1 {
+				app.window.Hide()
 			}
 		}
 
