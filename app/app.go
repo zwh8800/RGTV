@@ -2,6 +2,7 @@ package app
 
 import (
 	"fmt"
+	"os/exec"
 
 	"github.com/veandco/go-sdl2/sdl"
 )
@@ -11,7 +12,9 @@ type App struct {
 	surface *sdl.Surface
 	running bool
 
-	testRect sdl.Rect
+	testRect   sdl.Rect
+	windowHide bool
+	cmd        *exec.Cmd
 }
 
 func NewApp() (*App, error) {
@@ -73,17 +76,42 @@ func (app *App) handleEvent(e sdl.Event) {
 	case *sdl.JoyButtonEvent:
 		event := e.(*sdl.JoyButtonEvent)
 		if event.State == sdl.PRESSED {
-			if event.Button == 0x0 {
+			if event.Button == 0x0 { // A
 				app.testRect.X = 0
 				app.testRect.Y = 0
 			}
 
-			if event.Button == 0x8 {
+			if event.Button == 0x8 { // M
 				app.running = false
 			}
 
-			if event.Button == 0x1 {
-				app.window.Hide()
+			if event.Button == 0x1 { // B
+				if app.windowHide {
+					app.window.Show()
+					app.windowHide = false
+				} else {
+					app.window.Hide()
+					app.windowHide = true
+				}
+			}
+
+			if event.Button == 0x2 { // Y
+				fmt.Println("run cmd")
+				if app.cmd != nil {
+					err := app.cmd.Process.Kill()
+					if err != nil {
+						fmt.Println("cmd kill err:", err.Error())
+					}
+				}
+
+				app.cmd = exec.Command(
+					"/mnt/vendor/bin/video/ffplay",
+					"-fs", "-autoexit", "-vf", "scale=640:-2", "-i", "/mnt/mmc/Video/猫和老鼠/002.mp4",
+				)
+				err := app.cmd.Run()
+				if err != nil {
+					fmt.Println("cmd run err:", err.Error())
+				}
 			}
 		}
 
