@@ -14,7 +14,7 @@ type App struct {
 }
 
 func NewApp() (*App, error) {
-	if err := sdl.Init(sdl.INIT_AUDIO | sdl.INIT_VIDEO); err != nil {
+	if err := sdl.Init(sdl.INIT_AUDIO | sdl.INIT_VIDEO | sdl.INIT_GAMECONTROLLER); err != nil {
 		return nil, err
 	}
 
