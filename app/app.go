@@ -19,8 +19,16 @@ func NewApp() (*App, error) {
 		return nil, err
 	}
 
+	sdl.UnlockJoysticks()
+	sdl.JoystickEventState(sdl.ENABLE)
+
+	for i := 0; i < 10; i++ {
+		n := sdl.JoystickNameForIndex(i)
+		fmt.Println("joystick idx:", i, "name:", n)
+	}
+
 	window, err := sdl.CreateWindow("rgbili", sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED,
-		640, 480, sdl.WINDOW_SHOWN|sdl.WINDOW_FULLSCREEN|sdl.WINDOW_INPUT_GRABBED|sdl.WINDOW_INPUT_FOCUS)
+		640, 480, sdl.WINDOW_SHOWN|sdl.WINDOW_OPENGL)
 	if err != nil {
 		return nil, err
 	}
@@ -33,22 +41,19 @@ func NewApp() (*App, error) {
 	return &App{
 		window:  window,
 		surface: surface,
+
+		testRect: sdl.Rect{0, 0, 200, 200},
 	}, nil
 }
 
 func (app *App) Run() {
 	app.running = true
-	app.init()
 	for app.running {
 		for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
 			app.handleEvent(event)
 			app.draw()
 		}
 	}
-}
-
-func (app *App) init() {
-	app.testRect = sdl.Rect{0, 0, 200, 200}
 }
 
 func (app *App) handleEvent(event sdl.Event) {
