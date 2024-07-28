@@ -68,7 +68,7 @@ func (app *App) handleEvent(e sdl.Event) {
 
 	case *sdl.JoyButtonEvent:
 		event := e.(*sdl.JoyButtonEvent)
-		if event.State == sdl.KEYDOWN {
+		if event.State == sdl.PRESSED {
 			if event.Button == 0 {
 				app.testRect.X = 0
 				app.testRect.Y = 0
