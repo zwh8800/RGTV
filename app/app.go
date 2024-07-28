@@ -19,7 +19,7 @@ func NewApp() (*App, error) {
 	}
 
 	window, err := sdl.CreateWindow("rgbili", sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED,
-		640, 480, sdl.WINDOW_SHOWN)
+		640, 480, sdl.WINDOW_SHOWN|sdl.WINDOW_FULLSCREEN|sdl.WINDOW_INPUT_GRABBED|sdl.WINDOW_INPUT_FOCUS)
 	if err != nil {
 		return nil, err
 	}
