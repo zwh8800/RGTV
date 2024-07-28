@@ -19,13 +19,8 @@ func NewApp() (*App, error) {
 		return nil, err
 	}
 
-	sdl.UnlockJoysticks()
-	sdl.JoystickEventState(sdl.ENABLE)
-
-	for i := 0; i < 10; i++ {
-		n := sdl.JoystickNameForIndex(i)
-		fmt.Println("joystick idx:", i, "name:", n)
-	}
+	joystick := sdl.JoystickOpen(0)
+	fmt.Printf("joystick: %#v\n", joystick)
 
 	window, err := sdl.CreateWindow("rgbili", sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED,
 		640, 480, sdl.WINDOW_SHOWN|sdl.WINDOW_OPENGL)
