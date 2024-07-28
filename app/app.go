@@ -73,6 +73,10 @@ func (app *App) handleEvent(e sdl.Event) {
 				app.testRect.X = 0
 				app.testRect.Y = 0
 			}
+
+			if event.Button == 0x8 {
+				app.running = false
+			}
 		}
 
 	case *sdl.JoyAxisEvent:
