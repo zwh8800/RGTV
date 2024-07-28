@@ -28,10 +28,14 @@ func NewApp() (*App, error) {
 		return nil, err
 	}
 
+	fmt.Printf("window: %#v\n", window)
+
 	surface, err := window.GetSurface()
 	if err != nil {
 		return nil, err
 	}
+
+	fmt.Printf("surface: %#v\n", surface)
 
 	return &App{
 		window:  window,
