@@ -51,22 +51,36 @@ func (app *App) Run() {
 	}
 }
 
-func (app *App) handleEvent(event sdl.Event) {
-	fmt.Printf("%#v\n", event)
-	switch event.(type) {
-	case *sdl.KeyboardEvent:
-		kEvent := event.(*sdl.KeyboardEvent)
-		if kEvent.Type == sdl.KEYDOWN {
-			switch kEvent.Keysym.Sym {
-			case RawUp:
-				app.testRect.Y -= 10
-			case RawDown:
-				app.testRect.Y += 10
-			case RawLeft:
-				app.testRect.X -= 10
-			case RawRight:
-				app.testRect.X += 10
+func (app *App) handleEvent(e sdl.Event) {
+	fmt.Printf("%#v\n", e)
+	switch e.(type) {
+	case *sdl.JoyHatEvent:
+		event := e.(*sdl.JoyHatEvent)
+		if event.Value&sdl.HAT_LEFT != 0 {
+			app.testRect.X -= 10
+		} else if event.Value&sdl.HAT_RIGHT != 0 {
+			app.testRect.X += 10
+		} else if event.Value&sdl.HAT_UP != 0 {
+			app.testRect.Y -= 10
+		} else if event.Value&sdl.HAT_DOWN != 0 {
+			app.testRect.Y += 10
+		}
+
+	case *sdl.JoyButtonEvent:
+		event := e.(*sdl.JoyButtonEvent)
+		if event.State == sdl.KEYDOWN {
+			if event.Button == 0 {
+				app.testRect.X = 0
+				app.testRect.Y = 0
 			}
+		}
+
+	case *sdl.JoyAxisEvent:
+		event := e.(*sdl.JoyAxisEvent)
+		if event.Axis == 0 { // 左摇杆左右
+			app.testRect.X = int32(event.Value / 1000)
+		} else if event.Axis == 1 { // 左摇杆上下
+			app.testRect.Y = int32(event.Value / 1000)
 		}
 
 	case *sdl.QuitEvent:
