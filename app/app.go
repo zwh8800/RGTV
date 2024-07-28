@@ -1,6 +1,9 @@
 package app
 
-import "github.com/veandco/go-sdl2/sdl"
+import (
+	"fmt"
+	"github.com/veandco/go-sdl2/sdl"
+)
 
 type App struct {
 	window  *sdl.Window
@@ -48,6 +51,7 @@ func (app *App) init() {
 }
 
 func (app *App) handleEvent(event sdl.Event) {
+	fmt.Printf("%#v\n", event)
 	switch event.(type) {
 	case *sdl.KeyboardEvent:
 		kEvent := event.(*sdl.KeyboardEvent)
