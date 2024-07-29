@@ -1,10 +1,9 @@
 package component
 
 import (
-	"encoding/json"
 	"fmt"
 	"io"
-	"log"
+	"sync"
 	"unsafe"
 
 	ffmpeg "github.com/u2takey/ffmpeg-go"
@@ -13,6 +12,9 @@ import (
 
 type VideoBox struct {
 	rawVideoStream *io.PipeReader
+
+	once    sync.Once
+	texture *sdl.Texture
 }
 
 func NewVideoBox() *VideoBox {
@@ -23,7 +25,8 @@ func NewVideoBox() *VideoBox {
 
 	go func() {
 		defer pw.Close()
-		err := ffmpeg.Input("/Users/wastecat/Downloads/IMG_0981.MOV").
+		err := ffmpeg.Input("/mnt/mmc/Video/猫和老鼠/005.mp4", ffmpeg.KwArgs{"re": ""}).
+			SetFfmpegPath("/root/code/go/rgbili/ffmpeg").
 			Filter("scale", ffmpeg.Args{"640:480"}).
 			Output("pipe:",
 				ffmpeg.KwArgs{
@@ -45,10 +48,13 @@ func (v *VideoBox) HandleEvent(e sdl.Event) {
 }
 
 func (v *VideoBox) Draw(renderer *sdl.Renderer) {
-	texture, err := renderer.CreateTexture(sdl.PIXELFORMAT_RGB24, sdl.TEXTUREACCESS_STREAMING, 640, 480)
-	if err != nil {
-		panic(err)
-	}
+	v.once.Do(func() {
+		texture, err := renderer.CreateTexture(sdl.PIXELFORMAT_RGB24, sdl.TEXTUREACCESS_STREAMING, 640, 480)
+		if err != nil {
+			panic(err)
+		}
+		v.texture = texture
+	})
 
 	frameSize := 640 * 480 * 3
 	buf := make([]byte, frameSize)
@@ -59,38 +65,11 @@ func (v *VideoBox) Draw(renderer *sdl.Renderer) {
 		panic(fmt.Sprintf("read error: %d, %s", n, err))
 	}
 
-	err = texture.Update(nil, unsafe.Pointer(&buf[0]), 640*3)
+	err = v.texture.Update(nil, unsafe.Pointer(&buf[0]), 640*3)
 	if err != nil {
 		panic(err)
 	}
 	renderer.Clear()
-	renderer.Copy(texture, nil, nil)
+	renderer.Copy(v.texture, nil, nil)
 	renderer.Present()
-}
-
-func getVideoSize(fileName string) (int, int) {
-	log.Println("Getting video size for", fileName)
-	data, err := ffmpeg.Probe(fileName)
-	if err != nil {
-		panic(err)
-	}
-	log.Println("got video info", data)
-	type VideoInfo struct {
-		Streams []struct {
-			CodecType string `json:"codec_type"`
-			Width     int
-			Height    int
-		} `json:"streams"`
-	}
-	vInfo := &VideoInfo{}
-	err = json.Unmarshal([]byte(data), vInfo)
-	if err != nil {
-		panic(err)
-	}
-	for _, s := range vInfo.Streams {
-		if s.CodecType == "video" {
-			return s.Width, s.Height
-		}
-	}
-	return 0, 0
 }
