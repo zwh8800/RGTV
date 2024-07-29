@@ -26,7 +26,6 @@ func NewVideoBox() *VideoBox {
 	go func() {
 		defer pw.Close()
 		err := ffmpeg.Input("/mnt/mmc/Video/猫和老鼠/005.mp4", ffmpeg.KwArgs{"re": ""}).
-			SetFfmpegPath("/root/code/go/rgbili/ffmpeg").
 			Filter("scale", ffmpeg.Args{"640:480"}).
 			Output("pipe:",
 				ffmpeg.KwArgs{
@@ -34,6 +33,7 @@ func NewVideoBox() *VideoBox {
 				}).
 			WithOutput(pw).
 			ErrorToStdOut().
+			SetFfmpegPath("/root/code/go/rgbili/ffmpeg").
 			Run()
 		if err != nil {
 			panic(err)
