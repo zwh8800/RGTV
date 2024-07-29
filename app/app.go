@@ -8,13 +8,16 @@ import (
 )
 
 type App struct {
-	window  *sdl.Window
-	surface *sdl.Surface
-	running bool
+	window   *sdl.Window
+	surface  *sdl.Surface
+	renderer *sdl.Renderer
+	running  bool
 
 	testRect   sdl.Rect
 	windowHide bool
 	cmd        *exec.Cmd
+
+	videoBox *VideoBox
 }
 
 func NewApp() (*App, error) {
@@ -38,22 +41,35 @@ func NewApp() (*App, error) {
 		return nil, err
 	}
 
+	renderer, err := window.GetRenderer()
+	if err != nil {
+		return nil, err
+	}
+
 	fmt.Printf("surface: %#v\n", surface)
 
 	return &App{
-		window:  window,
-		surface: surface,
+		window:   window,
+		surface:  surface,
+		renderer: renderer,
 
 		testRect: sdl.Rect{0, 0, 200, 200},
 	}, nil
 }
+
+var draws = 0
 
 func (app *App) Run() {
 	app.running = true
 	for app.running {
 		for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
 			app.handleEvent(event)
-			app.draw()
+		}
+		app.draw()
+
+		draws++
+		if draws%100 == 0 {
+			fmt.Println("draws:", draws)
 		}
 	}
 }
@@ -61,6 +77,15 @@ func (app *App) Run() {
 func (app *App) handleEvent(e sdl.Event) {
 	fmt.Printf("%#v\n", e)
 	switch e.(type) {
+	case *sdl.KeyboardEvent:
+		event := e.(*sdl.KeyboardEvent)
+		if event.Type == sdl.KEYUP {
+			if event.Keysym.Sym == sdl.K_a {
+				fmt.Println("run videobox")
+				app.videoBox = NewVideoBox()
+			}
+		}
+
 	case *sdl.JoyHatEvent:
 		event := e.(*sdl.JoyHatEvent)
 		if event.Value&sdl.HAT_LEFT != 0 {
@@ -113,6 +138,11 @@ func (app *App) handleEvent(e sdl.Event) {
 					fmt.Println("cmd run err:", err.Error())
 				}
 			}
+
+			if event.Button == 0x3 { // X
+				fmt.Println("run videobox")
+				app.videoBox = NewVideoBox()
+			}
 		}
 
 	case *sdl.JoyAxisEvent:
@@ -131,12 +161,16 @@ func (app *App) handleEvent(e sdl.Event) {
 }
 
 func (app *App) draw() {
-	app.surface.FillRect(nil, 0)
+	if app.videoBox != nil {
+		app.videoBox.Draw(app.renderer)
+	} else {
+		app.surface.FillRect(nil, 0)
 
-	colour := sdl.Color{R: 255, G: 0, B: 255, A: 255} // purple
-	pixel := sdl.MapRGBA(app.surface.Format, colour.R, colour.G, colour.B, colour.A)
-	app.surface.FillRect(&app.testRect, pixel)
-	app.window.UpdateSurface()
+		colour := sdl.Color{R: 255, G: 0, B: 255, A: 255} // purple
+		pixel := sdl.MapRGBA(app.surface.Format, colour.R, colour.G, colour.B, colour.A)
+		app.surface.FillRect(&app.testRect, pixel)
+		app.window.UpdateSurface()
+	}
 }
 
 func (app *App) Quit() {
