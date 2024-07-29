@@ -2,9 +2,9 @@ package app
 
 import (
 	"fmt"
-	"os/exec"
 
 	"github.com/veandco/go-sdl2/sdl"
+	"github.com/zwh8800/rgbili/component"
 )
 
 type App struct {
@@ -13,11 +13,7 @@ type App struct {
 	renderer *sdl.Renderer
 	running  bool
 
-	testRect   sdl.Rect
-	windowHide bool
-	cmd        *exec.Cmd
-
-	videoBox *VideoBox
+	cur component.Component // 当前组件
 }
 
 func NewApp() (*App, error) {
@@ -53,11 +49,9 @@ func NewApp() (*App, error) {
 		surface:  surface,
 		renderer: renderer,
 
-		testRect: sdl.Rect{0, 0, 200, 200},
+		cur: component.NewTestComp(),
 	}, nil
 }
-
-var draws = 0
 
 func (app *App) Run() {
 	app.running = true
@@ -66,111 +60,15 @@ func (app *App) Run() {
 			app.handleEvent(event)
 		}
 		app.draw()
-
-		draws++
-		if draws%100 == 0 {
-			fmt.Println("draws:", draws)
-		}
 	}
 }
 
 func (app *App) handleEvent(e sdl.Event) {
-	fmt.Printf("%#v\n", e)
-	switch e.(type) {
-	case *sdl.KeyboardEvent:
-		event := e.(*sdl.KeyboardEvent)
-		if event.Type == sdl.KEYUP {
-			if event.Keysym.Sym == sdl.K_a {
-				fmt.Println("run videobox")
-				app.videoBox = NewVideoBox()
-			}
-		}
-
-	case *sdl.JoyHatEvent:
-		event := e.(*sdl.JoyHatEvent)
-		if event.Value&sdl.HAT_LEFT != 0 {
-			app.testRect.X -= 10
-		} else if event.Value&sdl.HAT_RIGHT != 0 {
-			app.testRect.X += 10
-		} else if event.Value&sdl.HAT_UP != 0 {
-			app.testRect.Y -= 10
-		} else if event.Value&sdl.HAT_DOWN != 0 {
-			app.testRect.Y += 10
-		}
-
-	case *sdl.JoyButtonEvent:
-		event := e.(*sdl.JoyButtonEvent)
-		if event.State == sdl.PRESSED {
-			if event.Button == 0x0 { // A
-				app.testRect.X = 0
-				app.testRect.Y = 0
-			}
-
-			if event.Button == 0x8 { // M
-				app.running = false
-			}
-
-			if event.Button == 0x1 { // B
-				if app.windowHide {
-					app.window.Show()
-					app.windowHide = false
-				} else {
-					app.window.Hide()
-					app.windowHide = true
-				}
-			}
-
-			if event.Button == 0x2 { // Y
-				fmt.Println("run cmd")
-				if app.cmd != nil {
-					err := app.cmd.Process.Kill()
-					if err != nil {
-						fmt.Println("cmd kill err:", err.Error())
-					}
-				}
-
-				app.cmd = exec.Command(
-					"/mnt/vendor/bin/video/ffplay",
-					"-fs", "-autoexit", "-vf", "scale=640:-2", "-i", "/mnt/mmc/Video/猫和老鼠/002.mp4",
-				)
-				err := app.cmd.Run()
-				if err != nil {
-					fmt.Println("cmd run err:", err.Error())
-				}
-			}
-
-			if event.Button == 0x3 { // X
-				fmt.Println("run videobox")
-				app.videoBox = NewVideoBox()
-			}
-		}
-
-	case *sdl.JoyAxisEvent:
-		event := e.(*sdl.JoyAxisEvent)
-		if event.Axis == 0 { // 左摇杆左右
-			app.testRect.X = int32(event.Value / 1000)
-		} else if event.Axis == 1 { // 左摇杆上下
-			app.testRect.Y = int32(event.Value / 1000)
-		}
-
-	case *sdl.QuitEvent:
-		println("Quit")
-		app.running = false
-		break
-	}
+	app.cur.HandleEvent(e)
 }
 
 func (app *App) draw() {
-	if app.videoBox != nil {
-		app.videoBox.Draw(app.renderer)
-	} else {
-		app.surface.FillRect(nil, 0)
-
-		colour := sdl.Color{R: 255, G: 0, B: 255, A: 255} // purple
-		pixel := sdl.MapRGBA(app.surface.Format, colour.R, colour.G, colour.B, colour.A)
-		app.surface.FillRect(&app.testRect, pixel)
-		app.window.UpdateSurface()
-	}
+	app.cur.Draw(app.renderer)
 }
 
 func (app *App) Quit() {

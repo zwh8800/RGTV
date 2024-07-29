@@ -1,4 +1,4 @@
-package app
+package component
 
 import (
 	"encoding/json"
@@ -41,8 +41,7 @@ func NewVideoBox() *VideoBox {
 }
 
 func (v *VideoBox) HandleEvent(e sdl.Event) {
-	//TODO implement me
-	panic("implement me")
+
 }
 
 func (v *VideoBox) Draw(renderer *sdl.Renderer) {
