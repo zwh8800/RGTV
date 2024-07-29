@@ -8,10 +8,11 @@ import (
 )
 
 type App struct {
-	window   *sdl.Window
-	surface  *sdl.Surface
-	renderer *sdl.Renderer
-	running  bool
+	window     *sdl.Window
+	surface    *sdl.Surface
+	renderer   *sdl.Renderer
+	running    bool
+	windowHide bool
 
 	cur component.Component // 当前组件
 }
@@ -64,6 +65,30 @@ func (app *App) Run() {
 }
 
 func (app *App) handleEvent(e sdl.Event) {
+	switch e.(type) {
+	case *sdl.JoyButtonEvent:
+		event := e.(*sdl.JoyButtonEvent)
+		if event.State == sdl.PRESSED {
+			if event.Button == 0x8 { // M
+				app.running = false
+			}
+
+			if event.Button == 0x1 { // B
+				if app.windowHide {
+					app.window.Show()
+					app.windowHide = false
+				} else {
+					app.window.Hide()
+					app.windowHide = true
+				}
+			}
+		}
+	case *sdl.QuitEvent:
+		println("Quit")
+		app.running = false
+		break
+	}
+
 	app.cur.HandleEvent(e)
 }
 

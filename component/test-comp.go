@@ -8,10 +8,9 @@ import (
 )
 
 type TestComp struct {
-	testRect   sdl.Rect
-	windowHide bool
-	cmd        *exec.Cmd
-	videoBox   *VideoBox
+	testRect sdl.Rect
+	cmd      *exec.Cmd
+	videoBox *VideoBox
 }
 
 func NewTestComp() *TestComp {
@@ -52,20 +51,6 @@ func (c *TestComp) HandleEvent(e sdl.Event) {
 				c.testRect.Y = 0
 			}
 
-			if event.Button == 0x8 { // M
-				c.running = false
-			}
-
-			if event.Button == 0x1 { // B
-				if c.windowHide {
-					c.window.Show()
-					c.windowHide = false
-				} else {
-					c.window.Hide()
-					c.windowHide = true
-				}
-			}
-
 			if event.Button == 0x2 { // Y
 				fmt.Println("run cmd")
 				if c.cmd != nil {
@@ -98,11 +83,6 @@ func (c *TestComp) HandleEvent(e sdl.Event) {
 		} else if event.Axis == 1 { // 左摇杆上下
 			c.testRect.Y = int32(event.Value / 1000)
 		}
-
-	case *sdl.QuitEvent:
-		println("Quit")
-		c.running = false
-		break
 	}
 }
 
