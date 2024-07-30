@@ -133,7 +133,7 @@ func printDebugInfo() {
 	for i := 0; i < n; i++ {
 		name := sdl.GetAudioDeviceName(i, false)
 		spec, _ := sdl.GetAudioDeviceSpec(i, false)
-		fmt.Printf("AudioDevice:%s, %#v", name, spec)
+		fmt.Printf("AudioDevice:%s, %#v\n", name, spec)
 	}
 
 	vd, _ := sdl.GetCurrentVideoDriver()
