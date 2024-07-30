@@ -22,10 +22,7 @@ func NewApp() (*App, error) {
 		return nil, err
 	}
 
-	vd, _ := sdl.GetCurrentVideoDriver()
-	fmt.Println("VideoDriver:", vd)
-	ad := sdl.GetCurrentAudioDriver()
-	fmt.Println("AudioDriver:", ad)
+	printDebugInfo()
 
 	joystick := sdl.JoystickOpen(0)
 	fmt.Printf("joystick: %#v\n", joystick)
@@ -104,4 +101,43 @@ func (app *App) draw() {
 func (app *App) Quit() {
 	app.window.Destroy()
 	sdl.Quit()
+}
+
+func printDebugInfo() {
+	n, _ := sdl.GetNumVideoDrivers()
+	for i := 0; i < n; i++ {
+		fmt.Println("VideoDriver:", sdl.GetVideoDriver(i))
+	}
+	n = sdl.GetNumAudioDrivers()
+	for i := 0; i < n; i++ {
+		fmt.Println("AudioDriver:", sdl.GetAudioDriver(i))
+	}
+
+	n, _ = sdl.GetNumRenderDrivers()
+	for i := 0; i < n; i++ {
+		var renderDriverInfo sdl.RendererInfo
+		sdl.GetRenderDriverInfo(i, &renderDriverInfo)
+		fmt.Printf("RenderDriver:%#v\n", renderDriverInfo)
+	}
+
+	n, _ = sdl.GetNumDisplayModes(0)
+	for i := 0; i < n; i++ {
+		mode, _ := sdl.GetDisplayMode(0, i)
+		fmt.Printf("DisplayMode:%#v\n", mode)
+	}
+
+	n, _ = sdl.GetNumVideoDisplays()
+	fmt.Println("NumVideoDisplays:", n)
+
+	n = sdl.GetNumAudioDevices(false)
+	for i := 0; i < n; i++ {
+		name := sdl.GetAudioDeviceName(i, false)
+		spec, _ := sdl.GetAudioDeviceSpec(i, false)
+		fmt.Printf("AudioDevice:%s, %#v", name, spec)
+	}
+
+	vd, _ := sdl.GetCurrentVideoDriver()
+	fmt.Println("VideoDriver:", vd)
+	ad := sdl.GetCurrentAudioDriver()
+	fmt.Println("AudioDriver:", ad)
 }
