@@ -99,3 +99,5 @@ func (c *TestComp) Draw(renderer *sdl.Renderer) {
 		renderer.Present()
 	}
 }
+
+func (c *TestComp) Dispose() {}

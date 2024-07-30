@@ -22,6 +22,11 @@ func NewApp() (*App, error) {
 		return nil, err
 	}
 
+	vd, _ := sdl.GetCurrentVideoDriver()
+	fmt.Println("VideoDriver:", vd)
+	ad := sdl.GetCurrentAudioDriver()
+	fmt.Println("AudioDriver:", ad)
+
 	joystick := sdl.JoystickOpen(0)
 	fmt.Printf("joystick: %#v\n", joystick)
 
