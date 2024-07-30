@@ -93,6 +93,8 @@ func NewVideoBox() *VideoBox {
 			Output("pipe:4",
 				ffmpeg.KwArgs{
 					"format": "s16le",
+					"ar":     44100,
+					"ac":     2,
 				})
 
 		cmd := ffmpeg.MergeOutputs(out1, out2).
