@@ -4,16 +4,16 @@ package component
 import "C"
 import (
 	"fmt"
-	"github.com/tidwall/gjson"
-	"github.com/zwh8800/rgbili/util"
 	"io"
 	"os"
 	"runtime"
 	"sync"
 	"unsafe"
 
+	"github.com/tidwall/gjson"
 	ffmpeg "github.com/u2takey/ffmpeg-go"
 	"github.com/veandco/go-sdl2/sdl"
+	"github.com/zwh8800/rgbili/util"
 )
 
 const (
@@ -102,7 +102,7 @@ func NewVideoBox() *VideoBox {
 		})
 
 		out1 := i.Get("v").
-			Filter("scale", ffmpeg.Args{"640:480"}).
+			Filter("scale", ffmpeg.Args{"640:-1"}).
 			Output("pipe:3",
 				ffmpeg.KwArgs{
 					"format": "rawvideo", "pix_fmt": "rgb24",
@@ -118,7 +118,7 @@ func NewVideoBox() *VideoBox {
 		cmd := ffmpeg.MergeOutputs(out1, out2).
 			WithOutput(pw1, pw2).
 			ErrorToStdOut().
-			//SetFfmpegPath("/root/code/go/rgbili/ffmpeg").
+			SetFfmpegPath("/root/code/go/rgbili/ffmpeg").
 			Compile()
 
 		cmd.ExtraFiles = []*os.File{
