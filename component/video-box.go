@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"os/exec"
 	"runtime"
 	"sync"
 	"unsafe"
@@ -52,6 +53,20 @@ type VideoBox struct {
 }
 
 func NewVideoBox() *VideoBox {
+	vinfo, err := util.WBIString("GET", "https://api.bilibili.com/x/web-interface/view?bvid="+BVID, "")
+	if err != nil {
+		panic(err)
+	}
+	cid := gjson.Get(vinfo, "data.cid").String()
+	sinfo, err := util.WBIString("GET", fmt.Sprintf("https://api.bilibili.com/x/player/wbi/playurl?bvid=%s&cid=%s", BVID, cid), "")
+	if err != nil {
+		panic(err)
+	}
+	videoUrl := gjson.Get(sinfo, "data.durl.0.url").String()
+	exec.Command("mpv", `--http-header-fields="User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36, Referer: https://www.bilibili.com/"`, videoUrl).Run()
+
+	return &VideoBox{}
+
 	v := &VideoBox{}
 	v.pinner.Pin(v)
 
@@ -64,7 +79,7 @@ func NewVideoBox() *VideoBox {
 		UserData: unsafe.Pointer(v),
 	}
 	obtained := &sdl.AudioSpec{}
-	err := sdl.OpenAudio(desired, obtained)
+	err = sdl.OpenAudio(desired, obtained)
 	if err != nil {
 		panic(err)
 	}
@@ -84,17 +99,6 @@ func NewVideoBox() *VideoBox {
 	go func() {
 		defer pw1.Close()
 		defer pw2.Close()
-
-		vinfo, err := util.WBIString("GET", "https://api.bilibili.com/x/web-interface/view?bvid="+BVID, "")
-		if err != nil {
-			panic(err)
-		}
-		cid := gjson.Get(vinfo, "data.cid").String()
-		sinfo, err := util.WBIString("GET", fmt.Sprintf("https://api.bilibili.com/x/player/wbi/playurl?bvid=%s&cid=%s", BVID, cid), "")
-		if err != nil {
-			panic(err)
-		}
-		videoUrl := gjson.Get(sinfo, "data.durl.0.url").String()
 
 		i := ffmpeg.Input(videoUrl, ffmpeg.KwArgs{
 			"re":      "",
@@ -142,6 +146,7 @@ func (v *VideoBox) HandleEvent(e sdl.Event) {
 }
 
 func (v *VideoBox) Draw(renderer *sdl.Renderer) {
+	return
 	v.once.Do(func() {
 		texture, err := renderer.CreateTexture(sdl.PIXELFORMAT_RGB24, sdl.TEXTUREACCESS_STREAMING, 640, 480)
 		if err != nil {
