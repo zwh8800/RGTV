@@ -102,7 +102,8 @@ func NewVideoBox() *VideoBox {
 		})
 
 		out1 := i.Get("v").
-			Filter("scale", ffmpeg.Args{"640:-1"}).
+			Filter("scale", ffmpeg.Args{"640:480:force_original_aspect_ratio=decrease"}).
+			Filter("pad", ffmpeg.Args{"640:480:(ow-iw)/2:(oh-ih)/2"}).
 			Output("pipe:3",
 				ffmpeg.KwArgs{
 					"format": "rawvideo", "pix_fmt": "rgb24",
