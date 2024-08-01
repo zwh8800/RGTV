@@ -4,6 +4,8 @@ package component
 import "C"
 import (
 	"fmt"
+	"github.com/tidwall/gjson"
+	"github.com/zwh8800/rgbili/util"
 	"io"
 	"os"
 	"runtime"
@@ -15,8 +17,10 @@ import (
 )
 
 const (
-	videoName = "/mnt/mmc/Video/猫和老鼠/005.mp4"
+	//videoName = "/mnt/mmc/Video/猫和老鼠/005.mp4"
 	//videoName = "/Users/wastecat/Downloads/test.mp4"
+
+	BVID = "BV1Dr421p7bP"
 )
 
 //export audioCallback
@@ -81,7 +85,21 @@ func NewVideoBox() *VideoBox {
 		defer pw1.Close()
 		defer pw2.Close()
 
-		i := ffmpeg.Input(videoName, ffmpeg.KwArgs{"re": ""})
+		vinfo, err := util.WBIString("GET", "https://api.bilibili.com/x/web-interface/view?bvid="+BVID, "")
+		if err != nil {
+			panic(err)
+		}
+		cid := gjson.Get(vinfo, "data.cid").String()
+		sinfo, err := util.WBIString("GET", fmt.Sprintf("https://api.bilibili.com/x/player/wbi/playurl?bvid=%s&cid=%s", BVID, cid), "")
+		if err != nil {
+			panic(err)
+		}
+		videoUrl := gjson.Get(sinfo, "data.durl.0.url").String()
+
+		i := ffmpeg.Input(videoUrl, ffmpeg.KwArgs{
+			"re":      "",
+			"headers": "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36\nReferer: https://www.bilibili.com/",
+		})
 
 		out1 := i.Get("v").
 			Filter("scale", ffmpeg.Args{"640:480"}).
@@ -100,14 +118,14 @@ func NewVideoBox() *VideoBox {
 		cmd := ffmpeg.MergeOutputs(out1, out2).
 			WithOutput(pw1, pw2).
 			ErrorToStdOut().
-			SetFfmpegPath("/root/code/go/rgbili/ffmpeg").
+			//SetFfmpegPath("/root/code/go/rgbili/ffmpeg").
 			Compile()
 
 		cmd.ExtraFiles = []*os.File{
 			pw1, pw2,
 		}
 
-		err := cmd.Run()
+		err = cmd.Run()
 		if err != nil {
 			panic(err)
 		}
