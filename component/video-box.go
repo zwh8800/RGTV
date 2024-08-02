@@ -103,7 +103,7 @@ func NewVideoBox(url string) (*VideoBox, error) {
 		cmd := ffmpeg.MergeOutputs(out1, out2).
 			WithOutput(pw1, pw2).
 			ErrorToStdOut().
-			//SetFfmpegPath("/root/code/go/rgbili/ffmpeg").
+			SetFfmpegPath("/root/code/go/rgbili/ffmpeg").
 			Compile()
 
 		cmd.ExtraFiles = []*os.File{
