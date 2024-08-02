@@ -27,7 +27,7 @@ func (c *TestComp) HandleEvent(e sdl.Event) {
 		if event.Type == sdl.KEYUP {
 			if event.Keysym.Sym == sdl.K_a {
 				fmt.Println("run videobox")
-				c.videoBox = NewVideoBox()
+				c.videoBox, _ = NewVideoBox("")
 			}
 		}
 
@@ -72,7 +72,7 @@ func (c *TestComp) HandleEvent(e sdl.Event) {
 
 			if event.Button == 0x3 { // X
 				fmt.Println("run videobox")
-				c.videoBox = NewVideoBox()
+				c.videoBox, _ = NewVideoBox("")
 			}
 		}
 

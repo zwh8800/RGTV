@@ -3,24 +3,18 @@ package component
 // void audioCallback(void *userdata, char *stream, int len);
 import "C"
 import (
+	"errors"
 	"fmt"
 	"io"
+	"log"
 	"os"
+	"os/exec"
 	"runtime"
 	"sync"
 	"unsafe"
 
-	"github.com/tidwall/gjson"
 	ffmpeg "github.com/u2takey/ffmpeg-go"
 	"github.com/veandco/go-sdl2/sdl"
-	"github.com/zwh8800/rgbili/util"
-)
-
-const (
-	//videoName = "/mnt/mmc/Video/猫和老鼠/005.mp4"
-	//videoName = "/Users/wastecat/Downloads/test.mp4"
-
-	BVID = "BV1Dr421p7bP"
 )
 
 //export audioCallback
@@ -51,7 +45,7 @@ type VideoBox struct {
 	pinner runtime.Pinner
 }
 
-func NewVideoBox() *VideoBox {
+func NewVideoBox(url string) (*VideoBox, error) {
 	v := &VideoBox{}
 	v.pinner.Pin(v)
 
@@ -66,18 +60,19 @@ func NewVideoBox() *VideoBox {
 	obtained := &sdl.AudioSpec{}
 	err := sdl.OpenAudio(desired, obtained)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
-	fmt.Println("obtained audio spec", obtained)
+	log.Println("obtained audio spec:", obtained)
+	sdl.PauseAudio(false)
 
 	pr1, pw1, err := os.Pipe()
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	v.rawVideoStream = pr1
 	pr2, pw2, err := os.Pipe()
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	v.rawAudioStream = pr2
 
@@ -85,20 +80,9 @@ func NewVideoBox() *VideoBox {
 		defer pw1.Close()
 		defer pw2.Close()
 
-		vinfo, err := util.WBIString("GET", "https://api.bilibili.com/x/web-interface/view?bvid="+BVID, "")
-		if err != nil {
-			panic(err)
-		}
-		cid := gjson.Get(vinfo, "data.cid").String()
-		sinfo, err := util.WBIString("GET", fmt.Sprintf("https://api.bilibili.com/x/player/wbi/playurl?bvid=%s&cid=%s", BVID, cid), "")
-		if err != nil {
-			panic(err)
-		}
-		videoUrl := gjson.Get(sinfo, "data.durl.0.url").String()
-
-		i := ffmpeg.Input(videoUrl, ffmpeg.KwArgs{
+		i := ffmpeg.Input(url, ffmpeg.KwArgs{
 			"re":      "",
-			"headers": "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36\nReferer: https://www.bilibili.com/",
+			"headers": "User-Agent: Lavf",
 		})
 
 		out1 := i.Get("v").
@@ -119,7 +103,7 @@ func NewVideoBox() *VideoBox {
 		cmd := ffmpeg.MergeOutputs(out1, out2).
 			WithOutput(pw1, pw2).
 			ErrorToStdOut().
-			SetFfmpegPath("/root/code/go/rgbili/ffmpeg").
+			//SetFfmpegPath("/root/code/go/rgbili/ffmpeg").
 			Compile()
 
 		cmd.ExtraFiles = []*os.File{
@@ -127,14 +111,12 @@ func NewVideoBox() *VideoBox {
 		}
 
 		err = cmd.Run()
-		if err != nil {
-			panic(err)
+		if err != nil && !errors.As(err, new(*exec.ExitError)) {
+			log.Printf("ffmpeg error: %s", err)
 		}
 	}()
 
-	sdl.PauseAudio(false)
-
-	return v
+	return v, nil
 }
 
 func (v *VideoBox) HandleEvent(e sdl.Event) {
@@ -163,11 +145,16 @@ func (v *VideoBox) Draw(renderer *sdl.Renderer) {
 	if err != nil {
 		panic(err)
 	}
-	renderer.Clear()
-	renderer.Copy(v.texture, nil, nil)
-	renderer.Present()
+	err = renderer.Copy(v.texture, nil, nil)
+	if err != nil {
+		panic(err)
+	}
 }
 
 func (v *VideoBox) Dispose() {
 	v.pinner.Unpin()
+	sdl.CloseAudio()
+	v.rawVideoStream.Close()
+	v.rawAudioStream.Close()
+	v.texture.Destroy()
 }

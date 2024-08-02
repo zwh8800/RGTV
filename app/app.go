@@ -5,6 +5,7 @@ import (
 
 	"github.com/veandco/go-sdl2/sdl"
 	"github.com/zwh8800/rgbili/component"
+	"github.com/zwh8800/rgbili/consts"
 )
 
 type App struct {
@@ -28,7 +29,7 @@ func NewApp() (*App, error) {
 	fmt.Printf("joystick: %#v\n", joystick)
 
 	window, err := sdl.CreateWindow("rgbili", sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED,
-		640, 480, sdl.WINDOW_SHOWN|sdl.WINDOW_OPENGL)
+		640, 480, sdl.WINDOW_SHOWN)
 	if err != nil {
 		return nil, err
 	}
@@ -52,7 +53,7 @@ func NewApp() (*App, error) {
 		surface:  surface,
 		renderer: renderer,
 
-		cur: component.NewTestComp(),
+		cur: component.NewMainFrame(),
 	}, nil
 }
 
@@ -71,11 +72,11 @@ func (app *App) handleEvent(e sdl.Event) {
 	case *sdl.JoyButtonEvent:
 		event := e.(*sdl.JoyButtonEvent)
 		if event.State == sdl.PRESSED {
-			if event.Button == 0x8 { // M
+			if event.Button == consts.ButtonMenu {
 				app.running = false
 			}
 
-			if event.Button == 0x1 { // B
+			if event.Button == consts.ButtonB {
 				if app.windowHide {
 					app.window.Show()
 					app.windowHide = false
