@@ -1,10 +1,14 @@
 package component
 
-// void audioCallback(void *userdata, char *stream, int len);
+/*
+#include <string.h>
+void audioCallback(void *userdata, char *stream, int len);
+*/
 import "C"
 import (
 	"errors"
 	"fmt"
+	"github.com/zwh8800/RGTV/conf"
 	"io"
 	"log"
 	"os"
@@ -19,6 +23,8 @@ import (
 
 //export audioCallback
 func audioCallback(userdata unsafe.Pointer, stream *C.char, len C.int) {
+	C.memset(unsafe.Pointer(stream), 0, C.ulong(len))
+
 	v := (*VideoBox)(userdata)
 	if v.rawAudioStream == nil {
 		return
@@ -103,7 +109,7 @@ func NewVideoBox(url string) (*VideoBox, error) {
 		cmd := ffmpeg.MergeOutputs(out1, out2).
 			WithOutput(pw1, pw2).
 			ErrorToStdOut().
-			SetFfmpegPath("/root/code/go/rgbili/ffmpeg").
+			SetFfmpegPath(conf.GetConfig().FFMPEGPath).
 			Compile()
 
 		cmd.ExtraFiles = []*os.File{

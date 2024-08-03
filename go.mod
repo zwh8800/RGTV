@@ -1,4 +1,4 @@
-module github.com/zwh8800/rgbili
+module github.com/zwh8800/RGTV
 
 go 1.22
 

@@ -6,8 +6,11 @@ import (
 )
 
 type Type struct {
+	ResX          int32  `json:"res_x"`
+	ResY          int32  `json:"res_y"`
 	LiveSourceUrl string `json:"live_source_url"`
 	EPGUrl        string `json:"epg_url"`
+	FFMPEGPath    string `json:"ffmpeg_path"`
 }
 
 var config = &Type{}
@@ -20,6 +23,15 @@ func init() {
 	err = json.Unmarshal(data, config)
 	if err != nil {
 		panic(err)
+	}
+	if config.ResX == 0 {
+		config.ResX = 640
+	}
+	if config.ResY == 0 {
+		config.ResY = 480
+	}
+	if config.FFMPEGPath == "" {
+		config.FFMPEGPath = "ffmpeg"
 	}
 }
 

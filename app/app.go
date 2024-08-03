@@ -2,10 +2,11 @@ package app
 
 import (
 	"fmt"
+	"github.com/zwh8800/RGTV/conf"
 
 	"github.com/veandco/go-sdl2/sdl"
-	"github.com/zwh8800/rgbili/component"
-	"github.com/zwh8800/rgbili/consts"
+	"github.com/zwh8800/RGTV/component"
+	"github.com/zwh8800/RGTV/consts"
 )
 
 type App struct {
@@ -28,8 +29,8 @@ func NewApp() (*App, error) {
 	joystick := sdl.JoystickOpen(0)
 	fmt.Printf("joystick: %#v\n", joystick)
 
-	window, err := sdl.CreateWindow("rgbili", sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED,
-		640, 480, sdl.WINDOW_SHOWN)
+	window, err := sdl.CreateWindow("RGTV", sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED,
+		conf.GetConfig().ResX, conf.GetConfig().ResY, sdl.WINDOW_SHOWN)
 	if err != nil {
 		return nil, err
 	}

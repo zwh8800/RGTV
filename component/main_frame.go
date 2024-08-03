@@ -2,9 +2,9 @@ package component
 
 import (
 	"github.com/veandco/go-sdl2/sdl"
-	"github.com/zwh8800/rgbili/conf"
-	"github.com/zwh8800/rgbili/consts"
-	"github.com/zwh8800/rgbili/model"
+	"github.com/zwh8800/RGTV/conf"
+	"github.com/zwh8800/RGTV/consts"
+	"github.com/zwh8800/RGTV/model"
 )
 
 type MainFrame struct {
