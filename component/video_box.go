@@ -85,22 +85,6 @@ func NewVideoBox(url string) (*VideoBox, error) {
 	v.pinner.Pin(v.videoBuf)
 	v.audioBuf = util.NewLimitedBuffer(2 * audioBufSize)
 
-	desired := &sdl.AudioSpec{
-		Freq:     44100,
-		Format:   sdl.AUDIO_S16LSB,
-		Channels: 2,
-		Samples:  4096,
-		Callback: sdl.AudioCallback(C.audioCallback),
-		UserData: unsafe.Pointer(v),
-	}
-	obtained := &sdl.AudioSpec{}
-	err := sdl.OpenAudio(desired, obtained)
-	if err != nil {
-		return nil, err
-	}
-	log.Println("obtained audio spec:", obtained)
-	sdl.PauseAudio(false)
-
 	pr1, pw1, err := os.Pipe()
 	if err != nil {
 		return nil, err
@@ -112,11 +96,30 @@ func NewVideoBox(url string) (*VideoBox, error) {
 	}
 	v.rawAudioStream = pr2
 
+	go v.openSdlAudio()
 	go v.runFFMPEG(pw1, pw2)
 	go v.asyncReadVideo()
 	go v.asyncReadAudio()
 
 	return v, nil
+}
+
+func (v *VideoBox) openSdlAudio() {
+	desired := &sdl.AudioSpec{
+		Freq:     44100,
+		Format:   sdl.AUDIO_S16LSB,
+		Channels: 2,
+		Samples:  4096,
+		Callback: sdl.AudioCallback(C.audioCallback),
+		UserData: unsafe.Pointer(v),
+	}
+	obtained := &sdl.AudioSpec{}
+	err := sdl.OpenAudio(desired, obtained)
+	if err != nil {
+		panic(err)
+	}
+	log.Println("obtained audio spec:", obtained)
+	sdl.PauseAudio(false)
 }
 
 func (v *VideoBox) runFFMPEG(pw1, pw2 *os.File) {
