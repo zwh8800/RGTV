@@ -1,19 +1,20 @@
 package component
 
 import (
+	"image"
+	"time"
+
 	"github.com/veandco/go-sdl2/sdl"
 	"github.com/zwh8800/RGTV/embeddata"
 	"github.com/zwh8800/RGTV/text"
 	"github.com/zwh8800/RGTV/util"
-	"image"
-	"time"
 )
 
 const (
 	width  = 560
 	height = 120
 
-	showTime = 3 * time.Second
+	channelInfoCloseList = 3 * time.Second
 )
 
 type ChannelInfo struct {
@@ -22,8 +23,8 @@ type ChannelInfo struct {
 	CurrentProgram string
 	NextProgram    string
 
-	shown       bool
-	showTimeout *time.Timer
+	shown      bool
+	closeTimer *time.Timer
 }
 
 func NewChannelInfo() *ChannelInfo {
@@ -65,11 +66,12 @@ func (c *ChannelInfo) Dispose() {
 
 func (c *ChannelInfo) Show() {
 	c.shown = true
-	c.showTimeout = time.NewTimer(showTime)
-	go func() {
-		<-c.showTimeout.C
-		c.Hide()
-	}()
+	if c.closeTimer != nil {
+		c.closeTimer.Stop()
+	}
+	c.closeTimer = time.AfterFunc(channelInfoCloseList, func() {
+		c.shown = false
+	})
 }
 
 func (c *ChannelInfo) Hide() {

@@ -15,7 +15,7 @@ const (
 )
 
 const (
-	closeTimeout = 10 * time.Second
+	channelListCloseTimeout = 10 * time.Second
 )
 
 type ChannelList struct {
@@ -51,10 +51,10 @@ func (c *ChannelList) HandleEvent(e sdl.Event) {
 		} else if event.Value&sdl.HAT_RIGHT != 0 {
 
 		} else if event.Value&sdl.HAT_UP != 0 {
-			c.closeTimer.Reset(closeTimeout)
+			c.closeTimer.Reset(channelListCloseTimeout)
 
 		} else if event.Value&sdl.HAT_DOWN != 0 {
-			c.closeTimer.Reset(closeTimeout)
+			c.closeTimer.Reset(channelListCloseTimeout)
 
 		}
 	case *sdl.JoyButtonEvent:
@@ -81,11 +81,12 @@ func (c *ChannelList) Dispose() {
 
 func (c *ChannelList) Show() {
 	c.shown = true
-	c.closeTimer = time.NewTimer(closeTimeout)
-	go func() {
-		<-c.closeTimer.C
-		c.Hide()
-	}()
+	if c.closeTimer != nil {
+		c.closeTimer.Stop()
+	}
+	c.closeTimer = time.AfterFunc(channelListCloseTimeout, func() {
+		c.shown = false
+	})
 }
 
 func (c *ChannelList) Hide() {

@@ -1,7 +1,6 @@
 package component
 
 import (
-	"fmt"
 	"github.com/veandco/go-sdl2/sdl"
 	"github.com/zwh8800/RGTV/conf"
 	"github.com/zwh8800/RGTV/consts"
@@ -44,8 +43,6 @@ func NewMainFrame() *MainFrame {
 }
 
 func (m *MainFrame) HandleEvent(e sdl.Event) {
-	fmt.Printf("%#v\n", e)
-
 	switch e.(type) {
 	case *sdl.JoyHatEvent:
 		event := e.(*sdl.JoyHatEvent)
