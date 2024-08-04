@@ -2,6 +2,7 @@ package model
 
 import (
 	"encoding/json"
+	"math"
 	"testing"
 )
 
@@ -39,4 +40,9 @@ func TestParseChannelFromM3U8Err(t *testing.T) {
 func tojson(data interface{}) string {
 	j, _ := json.Marshal(data)
 	return string(j)
+}
+
+func TestSSss(t *testing.T) {
+	y := -5
+	t.Log(math.Pow(10, float64(y)/10+1))
 }

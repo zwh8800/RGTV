@@ -4,11 +4,15 @@ go 1.22
 
 require (
 	github.com/asaskevich/EventBus v0.0.0-20200907212545-49d423059eef
+	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0
 	github.com/jamesnetherton/m3u v0.4.0
+	github.com/puzpuzpuz/xsync/v3 v3.4.0
+	github.com/smallnest/ringbuffer v0.0.0-20240802023544-f37d4ed3648b
 	github.com/tidwall/gjson v1.17.3
 	github.com/u2takey/ffmpeg-go v0.5.0
 	github.com/veandco/go-sdl2 v0.4.40
 	github.com/wk8/go-ordered-map/v2 v2.1.8
+	golang.org/x/image v0.0.0-20191009234506-e7c1f5e7dbb8
 )
 
 require (

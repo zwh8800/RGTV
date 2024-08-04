@@ -142,3 +142,5 @@ func (c *ChannelList) MoveDown() {
 	c.selectedGroup = c.playingGroup
 	c.eventBus.Publish(eventChannelChange, c)
 }
+
+var _ Component = (*ChannelList)(nil)

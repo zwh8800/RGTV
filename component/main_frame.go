@@ -1,6 +1,7 @@
 package component
 
 import (
+	"fmt"
 	"github.com/veandco/go-sdl2/sdl"
 	"github.com/zwh8800/RGTV/conf"
 	"github.com/zwh8800/RGTV/consts"
@@ -29,6 +30,7 @@ func NewMainFrame() *MainFrame {
 	}
 	channelList := NewChannelList(channelData)
 	channelInfo := NewChannelInfo()
+	channelInfo.ChannelName = channelData.Groups[0].Channels[0].Name
 
 	m := &MainFrame{
 		videoBox:    videoBox,
@@ -42,19 +44,23 @@ func NewMainFrame() *MainFrame {
 }
 
 func (m *MainFrame) HandleEvent(e sdl.Event) {
+	fmt.Printf("%#v\n", e)
+
 	switch e.(type) {
 	case *sdl.JoyHatEvent:
 		event := e.(*sdl.JoyHatEvent)
 		if event.Value&sdl.HAT_UP != 0 {
-			m.HatUp()
+			m.hatUp()
 		} else if event.Value&sdl.HAT_DOWN != 0 {
-			m.HatDown()
+			m.hatDown()
 		}
 	case *sdl.JoyButtonEvent:
 		event := e.(*sdl.JoyButtonEvent)
 		if event.State == sdl.RELEASED {
 			if event.Button == consts.ButtonA {
 				m.buttonA()
+			} else if event.Button == consts.ButtonX {
+				m.buttonX()
 			}
 		}
 
@@ -62,11 +68,17 @@ func (m *MainFrame) HandleEvent(e sdl.Event) {
 		event := e.(*sdl.KeyboardEvent)
 		if event.Type == sdl.KEYUP {
 			if event.Keysym.Sym == sdl.K_UP {
-				m.HatUp()
+				m.hatUp()
 			} else if event.Keysym.Sym == sdl.K_DOWN {
-				m.HatDown()
+				m.hatDown()
 			} else if event.Keysym.Sym == sdl.K_a {
 				m.buttonA()
+			} else if event.Keysym.Sym == sdl.K_x {
+				m.buttonX()
+			} else if event.Keysym.Sym == sdl.K_u {
+				m.buttonVolumeUp()
+			} else if event.Keysym.Sym == sdl.K_d {
+				m.buttonVolumeDown()
 			}
 		}
 	}
@@ -82,16 +94,27 @@ func (m *MainFrame) buttonA() {
 	}
 }
 
-func (m *MainFrame) HatUp() {
+func (m *MainFrame) buttonX() {
+	m.channelInfo.Show()
+}
+
+func (m *MainFrame) hatUp() {
 	if !m.channelList.IsShown() {
 		m.channelList.MoveUp()
 	}
 }
 
-func (m *MainFrame) HatDown() {
+func (m *MainFrame) hatDown() {
 	if !m.channelList.IsShown() {
 		m.channelList.MoveDown()
 	}
+}
+
+func (m *MainFrame) buttonVolumeUp() {
+	m.videoBox.VolumeUp()
+}
+func (m *MainFrame) buttonVolumeDown() {
+	m.videoBox.VolumeDown()
 }
 
 func (m *MainFrame) Draw(renderer *sdl.Renderer) {
@@ -119,4 +142,7 @@ func (m *MainFrame) OnChannelChange(_ any) {
 	if err != nil {
 		panic(err)
 	}
+	m.channelInfo.ChannelName = channel.Name
 }
+
+var _ Component = (*MainFrame)(nil)
