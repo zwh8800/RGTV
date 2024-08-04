@@ -1,11 +1,11 @@
 package channel_list
 
 import (
-	"github.com/zwh8800/RGTV/component"
 	"time"
 
 	evbus "github.com/asaskevich/EventBus"
 	"github.com/veandco/go-sdl2/sdl"
+	"github.com/zwh8800/RGTV/component"
 	"github.com/zwh8800/RGTV/consts"
 	"github.com/zwh8800/RGTV/model"
 )

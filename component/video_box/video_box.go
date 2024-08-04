@@ -3,8 +3,6 @@ package video_box
 import (
 	"errors"
 	"fmt"
-	"github.com/zwh8800/RGTV/component"
-	"github.com/zwh8800/RGTV/util"
 	"io"
 	"log"
 	"os"
@@ -16,7 +14,9 @@ import (
 
 	ffmpeg "github.com/u2takey/ffmpeg-go"
 	"github.com/veandco/go-sdl2/sdl"
+	"github.com/zwh8800/RGTV/component"
 	"github.com/zwh8800/RGTV/conf"
+	"github.com/zwh8800/RGTV/util"
 )
 
 const (
