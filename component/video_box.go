@@ -162,15 +162,16 @@ func (v *VideoBox) asyncReadVideo() {
 	for {
 		bufSize := videoBufSize
 		i := v.videoBufIdx.Load()
+		nextIdx := (i + 1) % int32(len(v.videoBuf))
 
-		n, err := io.ReadFull(v.rawVideoStream, v.videoBuf[i][0:bufSize])
+		n, err := io.ReadFull(v.rawVideoStream, v.videoBuf[nextIdx][0:bufSize])
 		if n == 0 || err == io.EOF {
 			return
 		} else if n != bufSize || err != nil {
 			fmt.Printf("read rawVideoStream error: %d, %s\n", n, err)
 			return
 		}
-		v.videoBufIdx.Store((i + 1) % 2)
+		v.videoBufIdx.Store(nextIdx)
 	}
 }
 
