@@ -1,17 +1,12 @@
-package component
+package video_box
 
-/*
-#include <string.h>
-void audioCallback(void *userdata, char *stream, int len);
-*/
-import "C"
 import (
 	"errors"
 	"fmt"
+	"github.com/zwh8800/RGTV/component"
 	"github.com/zwh8800/RGTV/util"
 	"io"
 	"log"
-	"math"
 	"os"
 	"os/exec"
 	"runtime"
@@ -28,30 +23,6 @@ const (
 	videoBufSize = 640 * 480 * 3
 	audioBufSize = 4096 * 2 * 2
 )
-
-//export audioCallback
-func audioCallback(userdata unsafe.Pointer, stream *C.char, len C.int) {
-	C.memset(unsafe.Pointer(stream), 0, C.ulong(len))
-
-	v := (*VideoBox)(userdata)
-
-	if v.audioVolume == 0 {
-		return
-	}
-
-	data := (*[1 << 30]byte)(unsafe.Pointer(stream))[:len:len]
-	_, err := v.audioBuf.Read(data)
-	if err != nil {
-		log.Println("audio buf empty")
-	}
-
-	linearVolume := math.Pow(10, float64(v.audioVolume-10)/10+1) / 10
-
-	i16data := (*[1 << 30]int16)(unsafe.Pointer(stream))[: len/2 : len/2]
-	for i := range i16data {
-		i16data[i] = int16(float64(i16data[i]) * linearVolume)
-	}
-}
 
 type VideoBox struct {
 	url string
@@ -75,6 +46,8 @@ type VideoBox struct {
 }
 
 func NewVideoBox(url string) (*VideoBox, error) {
+	initAudio()
+
 	v := &VideoBox{
 		url:         url,
 		audioVolume: 5,
@@ -84,22 +57,6 @@ func NewVideoBox(url string) (*VideoBox, error) {
 	v.videoBuf = new([2][videoBufSize]byte)
 	v.pinner.Pin(v.videoBuf)
 	v.audioBuf = util.NewLimitedBuffer(2 * audioBufSize)
-
-	desired := &sdl.AudioSpec{
-		Freq:     44100,
-		Format:   sdl.AUDIO_S16LSB,
-		Channels: 2,
-		Samples:  4096,
-		Callback: sdl.AudioCallback(C.audioCallback),
-		UserData: unsafe.Pointer(v),
-	}
-	obtained := &sdl.AudioSpec{}
-	err := sdl.OpenAudio(desired, obtained)
-	if err != nil {
-		return nil, err
-	}
-	log.Println("obtained audio spec:", obtained)
-	sdl.PauseAudio(false)
 
 	pr1, pw1, err := os.Pipe()
 	if err != nil {
@@ -116,6 +73,7 @@ func NewVideoBox(url string) (*VideoBox, error) {
 	go v.asyncReadVideo()
 	go v.asyncReadAudio()
 
+	vf.Set(v)
 	return v, nil
 }
 
@@ -207,8 +165,8 @@ func (v *VideoBox) Draw(renderer *sdl.Renderer) {
 }
 
 func (v *VideoBox) Dispose() {
+	vf.Set(nil)
 	v.pinner.Unpin()
-	sdl.CloseAudio()
 	v.rawVideoStream.Close()
 	v.rawAudioStream.Close()
 	v.texture.Destroy()
@@ -232,4 +190,4 @@ func (v *VideoBox) VolumeDown() {
 	v.audioVolume--
 }
 
-var _ Component = (*VideoBox)(nil)
+var _ component.Component = (*VideoBox)(nil)

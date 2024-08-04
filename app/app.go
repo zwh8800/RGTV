@@ -2,6 +2,7 @@ package app
 
 import (
 	"fmt"
+	"github.com/zwh8800/RGTV/component/main_frame"
 	"github.com/zwh8800/RGTV/conf"
 
 	"github.com/veandco/go-sdl2/sdl"
@@ -54,7 +55,7 @@ func NewApp() (*App, error) {
 		surface:  surface,
 		renderer: renderer,
 
-		cur: component.NewMainFrame(),
+		cur: main_frame.NewMainFrame(),
 	}, nil
 }
 

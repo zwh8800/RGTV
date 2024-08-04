@@ -1,16 +1,20 @@
-package component
+package main_frame
 
 import (
 	"github.com/veandco/go-sdl2/sdl"
+	"github.com/zwh8800/RGTV/component"
+	"github.com/zwh8800/RGTV/component/channel_info"
+	"github.com/zwh8800/RGTV/component/channel_list"
+	"github.com/zwh8800/RGTV/component/video_box"
 	"github.com/zwh8800/RGTV/conf"
 	"github.com/zwh8800/RGTV/consts"
 	"github.com/zwh8800/RGTV/model"
 )
 
 type MainFrame struct {
-	videoBox    *VideoBox
-	channelList *ChannelList
-	channelInfo *ChannelInfo
+	videoBox    *video_box.VideoBox
+	channelList *channel_list.ChannelList
+	channelInfo *channel_info.ChannelInfo
 }
 
 func NewMainFrame() *MainFrame {
@@ -23,12 +27,12 @@ func NewMainFrame() *MainFrame {
 		}
 	}
 
-	videoBox, err := NewVideoBox(channelData.Groups[0].Channels[0].Url)
+	videoBox, err := video_box.NewVideoBox(channelData.Groups[0].Channels[0].Url)
 	if err != nil {
 		panic(err)
 	}
-	channelList := NewChannelList(channelData)
-	channelInfo := NewChannelInfo()
+	channelList := channel_list.NewChannelList(channelData)
+	channelInfo := channel_info.NewChannelInfo()
 	channelInfo.ChannelName = channelData.Groups[0].Channels[0].Name
 
 	m := &MainFrame{
@@ -139,7 +143,7 @@ func (m *MainFrame) OnChannelChange(_ any) {
 	_, channel := m.channelList.GetCurChannel()
 	m.videoBox.Dispose()
 	var err error
-	m.videoBox, err = NewVideoBox(channel.Url)
+	m.videoBox, err = video_box.NewVideoBox(channel.Url)
 	if err != nil {
 		panic(err)
 	}
@@ -147,4 +151,4 @@ func (m *MainFrame) OnChannelChange(_ any) {
 	m.channelInfo.Show()
 }
 
-var _ Component = (*MainFrame)(nil)
+var _ component.Component = (*MainFrame)(nil)

@@ -1,6 +1,7 @@
-package component
+package channel_list
 
 import (
+	"github.com/zwh8800/RGTV/component"
 	"time"
 
 	evbus "github.com/asaskevich/EventBus"
@@ -144,4 +145,4 @@ func (c *ChannelList) MoveDown() {
 	c.eventBus.Publish(eventChannelChange, c)
 }
 
-var _ Component = (*ChannelList)(nil)
+var _ component.Component = (*ChannelList)(nil)
