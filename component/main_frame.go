@@ -143,6 +143,7 @@ func (m *MainFrame) OnChannelChange(_ any) {
 		panic(err)
 	}
 	m.channelInfo.ChannelName = channel.Name
+	m.channelInfo.Show()
 }
 
 var _ Component = (*MainFrame)(nil)

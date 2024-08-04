@@ -42,6 +42,11 @@ func (c *ChannelInfo) Draw(renderer *sdl.Renderer) {
 	if err != nil {
 		panic(err)
 	}
+	c.drawChannelName(renderer, textDrawer)
+
+}
+
+func (c *ChannelInfo) drawChannelName(renderer *sdl.Renderer, textDrawer *text.Drawer) {
 	channelNameImg, err := textDrawer.Draw(c.ChannelName, 64, image.White)
 	if err != nil {
 		panic(err)
@@ -52,7 +57,6 @@ func (c *ChannelInfo) Draw(renderer *sdl.Renderer) {
 	if err != nil {
 		panic(err)
 	}
-
 }
 
 func (c *ChannelInfo) Dispose() {
