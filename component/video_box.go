@@ -85,26 +85,6 @@ func NewVideoBox(url string) (*VideoBox, error) {
 	v.pinner.Pin(v.videoBuf)
 	v.audioBuf = util.NewLimitedBuffer(2 * audioBufSize)
 
-	pr1, pw1, err := os.Pipe()
-	if err != nil {
-		return nil, err
-	}
-	v.rawVideoStream = pr1
-	pr2, pw2, err := os.Pipe()
-	if err != nil {
-		return nil, err
-	}
-	v.rawAudioStream = pr2
-
-	go v.openSdlAudio()
-	go v.runFFMPEG(pw1, pw2)
-	go v.asyncReadVideo()
-	go v.asyncReadAudio()
-
-	return v, nil
-}
-
-func (v *VideoBox) openSdlAudio() {
 	desired := &sdl.AudioSpec{
 		Freq:     44100,
 		Format:   sdl.AUDIO_S16LSB,
@@ -116,10 +96,27 @@ func (v *VideoBox) openSdlAudio() {
 	obtained := &sdl.AudioSpec{}
 	err := sdl.OpenAudio(desired, obtained)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	log.Println("obtained audio spec:", obtained)
 	sdl.PauseAudio(false)
+
+	pr1, pw1, err := os.Pipe()
+	if err != nil {
+		return nil, err
+	}
+	v.rawVideoStream = pr1
+	pr2, pw2, err := os.Pipe()
+	if err != nil {
+		return nil, err
+	}
+	v.rawAudioStream = pr2
+
+	go v.runFFMPEG(pw1, pw2)
+	go v.asyncReadVideo()
+	go v.asyncReadAudio()
+
+	return v, nil
 }
 
 func (v *VideoBox) runFFMPEG(pw1, pw2 *os.File) {
