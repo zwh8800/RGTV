@@ -144,6 +144,7 @@ func (v *VideoBox) runFFMPEG(pw1, pw2 *os.File) {
 			})
 
 	v.cmd = ffmpeg.MergeOutputs(out1, out2).
+		ErrorToStdOut().
 		SetFfmpegPath(conf.GetConfig().FFMPEGPath).
 		Compile()
 

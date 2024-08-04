@@ -61,6 +61,10 @@ func (m *MainFrame) HandleEvent(e sdl.Event) {
 				m.buttonA()
 			} else if event.Button == consts.ButtonX {
 				m.buttonX()
+			} else if event.Button == consts.ButtonVolumeUp {
+				m.buttonVolumeUp()
+			} else if event.Button == consts.ButtonVolumeDown {
+				m.buttonVolumeDown()
 			}
 		}
 

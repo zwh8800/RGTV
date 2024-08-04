@@ -26,15 +26,17 @@ const (
 )
 
 const (
-	ButtonA      = 0x0
-	ButtonB      = 0x1
-	ButtonX      = 0x3
-	ButtonY      = 0x2
-	ButtonStart  = 0x6
-	ButtonSelect = 0x7
-	ButtonL1     = 0x4
-	ButtonL2     = 0xa
-	ButtonR1     = 0x5
-	ButtonR2     = 0xb
-	ButtonMenu   = 0x8
+	ButtonA          = 0x0
+	ButtonB          = 0x1
+	ButtonX          = 0x3
+	ButtonY          = 0x2
+	ButtonStart      = 0x6
+	ButtonSelect     = 0x7
+	ButtonL1         = 0x4
+	ButtonL2         = 0xa
+	ButtonR1         = 0x5
+	ButtonR2         = 0xb
+	ButtonMenu       = 0x8
+	ButtonVolumeUp   = 0x10
+	ButtonVolumeDown = 0xf
 )
