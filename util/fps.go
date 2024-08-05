@@ -1,7 +1,6 @@
 package util
 
 import (
-	"fmt"
 	"time"
 )
 
@@ -24,7 +23,6 @@ func (frc *FPSManager) Wait() {
 	now := time.Now()
 	elapsed := now.Sub(frc.lastTime)
 	if elapsed < frc.frameDuration {
-		fmt.Println(frc.frameDuration - elapsed)
 		time.Sleep(frc.frameDuration - elapsed)
 	}
 	frc.lastTime = now
