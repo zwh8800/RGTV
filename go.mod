@@ -11,7 +11,7 @@ require (
 	github.com/u2takey/ffmpeg-go v0.5.0
 	github.com/veandco/go-sdl2 v0.4.40
 	github.com/wk8/go-ordered-map/v2 v2.1.8
-	golang.org/x/image v0.0.0-20191009234506-e7c1f5e7dbb8
+	golang.org/x/image v0.18.0
 )
 
 require (
