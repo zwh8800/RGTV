@@ -21,7 +21,7 @@ import (
 
 const (
 	videoBufSize = 640 * 480 * 3
-	audioBufSize = 4096 * 2 * 2
+	audioBufSize = 4096 * 2 * 4 // 4倍sample buffer
 )
 
 type VideoBox struct {
