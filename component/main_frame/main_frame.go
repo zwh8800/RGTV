@@ -105,13 +105,21 @@ func (m *MainFrame) buttonX() {
 
 func (m *MainFrame) hatUp() {
 	if !m.channelList.IsShown() {
-		m.channelList.MoveUp()
+		if conf.GetConfig().RevertSwitchChannel {
+			m.channelList.MoveUp()
+		} else {
+			m.channelList.MoveDown()
+		}
 	}
 }
 
 func (m *MainFrame) hatDown() {
 	if !m.channelList.IsShown() {
-		m.channelList.MoveDown()
+		if conf.GetConfig().RevertSwitchChannel {
+			m.channelList.MoveDown()
+		} else {
+			m.channelList.MoveUp()
+		}
 	}
 }
 

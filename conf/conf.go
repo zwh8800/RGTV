@@ -6,11 +6,12 @@ import (
 )
 
 type Type struct {
-	ResX          int32  `json:"res_x"`
-	ResY          int32  `json:"res_y"`
-	LiveSourceUrl string `json:"live_source_url"`
-	EPGUrl        string `json:"epg_url"`
-	FFMPEGPath    string `json:"ffmpeg_path"`
+	ResX                int32  `json:"res_x"`
+	ResY                int32  `json:"res_y"`
+	LiveSourceUrl       string `json:"live_source_url"`
+	EPGUrl              string `json:"epg_url"`
+	FFMPEGPath          string `json:"ffmpeg_path"`
+	RevertSwitchChannel bool   `json:"revert_switch_channel"`
 }
 
 var config = &Type{}
