@@ -47,16 +47,14 @@ func NewMainFrame() *MainFrame {
 }
 
 func (m *MainFrame) HandleEvent(e sdl.Event) {
-	switch e.(type) {
+	switch event := e.(type) {
 	case *sdl.JoyHatEvent:
-		event := e.(*sdl.JoyHatEvent)
 		if event.Value&sdl.HAT_UP != 0 {
 			m.hatUp()
 		} else if event.Value&sdl.HAT_DOWN != 0 {
 			m.hatDown()
 		}
 	case *sdl.JoyButtonEvent:
-		event := e.(*sdl.JoyButtonEvent)
 		if event.State == sdl.RELEASED {
 			if event.Button == consts.ButtonA {
 				m.buttonA()
@@ -70,7 +68,6 @@ func (m *MainFrame) HandleEvent(e sdl.Event) {
 		}
 
 	case *sdl.KeyboardEvent:
-		event := e.(*sdl.KeyboardEvent)
 		if event.Type == sdl.KEYUP {
 			if event.Keysym.Sym == sdl.K_UP {
 				m.hatUp()

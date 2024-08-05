@@ -8,14 +8,15 @@ import (
 	"github.com/zwh8800/RGTV/component/main_frame"
 	"github.com/zwh8800/RGTV/conf"
 	"github.com/zwh8800/RGTV/consts"
+	"github.com/zwh8800/RGTV/util"
 )
 
 type App struct {
-	window     *sdl.Window
-	surface    *sdl.Surface
-	renderer   *sdl.Renderer
-	running    bool
-	windowHide bool
+	window   *sdl.Window
+	surface  *sdl.Surface
+	renderer *sdl.Renderer
+	running  bool
+	fpsm     *util.FPSManager
 
 	cur component.Component // 当前组件
 }
@@ -50,10 +51,13 @@ func NewApp() (*App, error) {
 
 	fmt.Printf("surface: %#v\n", surface)
 
+	fpsm := util.NewFPSManager(30)
+
 	return &App{
 		window:   window,
 		surface:  surface,
 		renderer: renderer,
+		fpsm:     fpsm,
 
 		cur: main_frame.NewMainFrame(),
 	}, nil
@@ -66,32 +70,21 @@ func (app *App) Run() {
 			app.handleEvent(event)
 		}
 		app.draw()
+		app.fpsm.Wait()
 	}
 }
 
 func (app *App) handleEvent(e sdl.Event) {
-	switch e.(type) {
+	switch event := e.(type) {
 	case *sdl.JoyButtonEvent:
-		event := e.(*sdl.JoyButtonEvent)
 		if event.State == sdl.PRESSED {
 			if event.Button == consts.ButtonMenu {
 				app.running = false
 			}
-
-			if event.Button == consts.ButtonB {
-				if app.windowHide {
-					app.window.Show()
-					app.windowHide = false
-				} else {
-					app.window.Hide()
-					app.windowHide = true
-				}
-			}
 		}
 	case *sdl.QuitEvent:
-		println("Quit")
+		fmt.Println("Quit")
 		app.running = false
-		break
 	}
 
 	app.cur.HandleEvent(e)

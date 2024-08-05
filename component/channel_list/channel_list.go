@@ -44,9 +44,8 @@ func (c *ChannelList) HandleEvent(e sdl.Event) {
 		return
 	}
 
-	switch e.(type) {
+	switch event := e.(type) {
 	case *sdl.JoyHatEvent:
-		event := e.(*sdl.JoyHatEvent)
 		if event.Value&sdl.HAT_LEFT != 0 {
 
 		} else if event.Value&sdl.HAT_RIGHT != 0 {
@@ -59,7 +58,6 @@ func (c *ChannelList) HandleEvent(e sdl.Event) {
 
 		}
 	case *sdl.JoyButtonEvent:
-		event := e.(*sdl.JoyButtonEvent)
 		if event.State == sdl.PRESSED {
 			if event.Button == consts.ButtonA {
 

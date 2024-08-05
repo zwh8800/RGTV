@@ -89,6 +89,7 @@ func (v *VideoBox) runFFMPEG(pw1, pw2 *os.File) {
 	out1 := i.Get("v").
 		Filter("scale", ffmpeg.Args{"640:480:force_original_aspect_ratio=decrease"}).
 		Filter("pad", ffmpeg.Args{"640:480:(ow-iw)/2:(oh-ih)/2"}).
+		Filter("fps", ffmpeg.Args{"30"}).
 		Output("pipe:3",
 			ffmpeg.KwArgs{
 				"format": "rawvideo", "pix_fmt": "rgb24",
