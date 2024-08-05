@@ -62,32 +62,12 @@ func NewDrawerFromData(data []byte) (*Drawer, error) {
 	return &Drawer{font: f}, nil
 }
 
-// MeasureTextSize 测量给定文本和字体大小所需的图像宽度和高度
-func (d *Drawer) MeasureTextSize(text string, fontSize float64) (int, int, error) {
-	pt := freetype.Pt(0, int(fontSize))
-
-	// 使用 Drawer 测量文本尺寸
-	drawer := &font.Drawer{
-		Face: truetype.NewFace(d.font, &truetype.Options{
-			Size: fontSize,
-		}),
-		Dot: pt,
-	}
-
-	// 计算文本的边界框
-	bounds, _ := drawer.BoundString(text)
-	width := (bounds.Max.X - bounds.Min.X).Ceil()
-	height := (bounds.Max.Y - bounds.Min.Y).Ceil()
-
-	return width, height, nil
-}
-
 func (d *Drawer) Draw(text string, fontSize float64, color *image.Uniform) (*image.RGBA, error) {
 	// Create a freetype context.
 	fc := freetype.NewContext()
-	fc.SetDPI(72)
 	fc.SetFont(d.font)
 	fc.SetFontSize(fontSize)
+	fc.SetDPI(72)
 	fc.SetSrc(color)
 
 	// Calculate the bounds of the text.

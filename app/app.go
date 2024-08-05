@@ -39,6 +39,8 @@ func NewApp() (*App, error) {
 
 	fmt.Printf("window: %#v\n", window)
 
+	sdl.ShowSimpleMessageBox(sdl.MESSAGEBOX_INFORMATION, "测试", "gggggg", window)
+
 	surface, err := window.GetSurface()
 	if err != nil {
 		return nil, err
