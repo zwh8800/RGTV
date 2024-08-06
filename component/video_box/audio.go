@@ -17,6 +17,19 @@ import (
 
 var (
 	once sync.Once
+
+	volumeMap = map[int]float64{
+		1:  -20,
+		2:  -14,
+		3:  -10,
+		4:  -7.5,
+		5:  -6,
+		6:  -4.5,
+		7:  -3,
+		8:  -2,
+		9:  -1,
+		10: 0,
+	}
 )
 
 type videoBoxRef struct {
@@ -53,7 +66,7 @@ func audioCallback(userdata unsafe.Pointer, stream *C.char, len C.int) {
 		log.Println("audio buf empty")
 	}
 
-	linearVolume := math.Pow(10, float64(v.audioVolume-10)/10+1) / 10
+	linearVolume := math.Pow(10, volumeMap[v.audioVolume]/10)
 
 	i16data := (*[1 << 30]int16)(unsafe.Pointer(stream))[: len/2 : len/2]
 	for i := range i16data {
