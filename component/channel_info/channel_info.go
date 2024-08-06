@@ -61,6 +61,7 @@ func (c *ChannelInfo) Draw(renderer *sdl.Renderer) {
 	c.drawChannelNumber(renderer, textDrawer)
 	c.drawCurProgram(renderer, textDrawer)
 	c.drawNextProgram(renderer, textDrawer)
+	c.drawHelp(renderer, textDrawer)
 }
 
 func (c *ChannelInfo) drawChannelNumber(renderer *sdl.Renderer, textDrawer *text.Drawer) {
@@ -151,16 +152,41 @@ func (c *ChannelInfo) drawNextProgram(renderer *sdl.Renderer, textDrawer *text.D
 	}
 }
 
+func (c *ChannelInfo) drawHelp(renderer *sdl.Renderer, textDrawer *text.Drawer) {
+	txt := "▲▼：换台  ◁▷：换源  A：列表  B：退出  X：屏显"
+
+	img, err := textDrawer.Draw(txt, 12, image.White)
+	if err != nil {
+		panic(err)
+	}
+
+	x := posX + channelNameWidth + 20
+	y := posY + height - 20
+
+	err = util.DrawGoImage(renderer, img,
+		image.Rect(
+			x,
+			y,
+			x+img.Bounds().Dx(),
+			y+img.Bounds().Dy(),
+		))
+	if err != nil {
+		panic(err)
+	}
+}
+
 func (c *ChannelInfo) drawSplitLine(renderer *sdl.Renderer) {
 	renderer.SetDrawColor(255, 255, 255, 255)
 
+	// 竖线
 	renderer.DrawLine(
 		posX+channelNameWidth,
-		posY+20,
+		posY+10,
 		posX+channelNameWidth,
-		posY+height-20,
+		posY+height-10,
 	)
 
+	// 横线
 	renderer.DrawLine(
 		posX+channelNameWidth+20,
 		midY,
