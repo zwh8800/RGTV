@@ -59,7 +59,7 @@ func NewApp() (*App, error) {
 		renderer: renderer,
 		fpsm:     fpsm,
 
-		cur: main_frame.NewMainFrame(),
+		cur: main_frame.New(),
 	}, nil
 }
 

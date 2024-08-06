@@ -6,6 +6,7 @@ import (
 	"github.com/zwh8800/RGTV/component/channel_info"
 	"github.com/zwh8800/RGTV/component/channel_list"
 	"github.com/zwh8800/RGTV/component/video_box"
+	"github.com/zwh8800/RGTV/component/volume_bar"
 	"github.com/zwh8800/RGTV/conf"
 	"github.com/zwh8800/RGTV/consts"
 	"github.com/zwh8800/RGTV/model"
@@ -15,9 +16,10 @@ type MainFrame struct {
 	videoBox    *video_box.VideoBox
 	channelList *channel_list.ChannelList
 	channelInfo *channel_info.ChannelInfo
+	volumeBar   *volume_bar.VolumeBar
 }
 
-func NewMainFrame() *MainFrame {
+func New() *MainFrame {
 	url := conf.GetConfig().LiveSourceUrl
 	channelData, err := model.ParseChannelFromM3U8(url)
 	if err != nil {
@@ -27,19 +29,23 @@ func NewMainFrame() *MainFrame {
 		}
 	}
 
-	videoBox, err := video_box.NewVideoBox(channelData.Groups[0].Channels[0].Url)
+	videoBox, err := video_box.New(channelData.Groups[0].Channels[0].Url)
 	if err != nil {
 		panic(err)
 	}
-	channelList := channel_list.NewChannelList(channelData)
-	channelInfo := channel_info.NewChannelInfo()
+	channelList := channel_list.New(channelData)
+
+	channelInfo := channel_info.New()
 	channelInfo.ChannelNumber = 1
 	channelInfo.ChannelName = channelData.Groups[0].Channels[0].Name
+
+	volumeBar := volume_bar.New()
 
 	m := &MainFrame{
 		videoBox:    videoBox,
 		channelList: channelList,
 		channelInfo: channelInfo,
+		volumeBar:   volumeBar,
 	}
 
 	m.channelList.OnChannelChange(m.OnChannelChange)
@@ -123,10 +129,13 @@ func (m *MainFrame) hatDown() {
 }
 
 func (m *MainFrame) buttonVolumeUp() {
-	m.videoBox.VolumeUp()
+	m.volumeBar.VolumeUp()
+	m.videoBox.SetVolume(m.volumeBar.GetVolume())
 }
+
 func (m *MainFrame) buttonVolumeDown() {
-	m.videoBox.VolumeDown()
+	m.volumeBar.VolumeDown()
+	m.videoBox.SetVolume(m.volumeBar.GetVolume())
 }
 
 func (m *MainFrame) Draw(renderer *sdl.Renderer) {
@@ -137,6 +146,7 @@ func (m *MainFrame) Draw(renderer *sdl.Renderer) {
 	m.videoBox.Draw(renderer)
 	m.channelList.Draw(renderer)
 	m.channelInfo.Draw(renderer)
+	m.volumeBar.Draw(renderer)
 	renderer.Present()
 }
 
@@ -150,7 +160,7 @@ func (m *MainFrame) OnChannelChange(_ any) {
 	_, channel := m.channelList.GetCurChannel()
 	m.videoBox.Dispose()
 	var err error
-	m.videoBox, err = video_box.NewVideoBox(channel.Url)
+	m.videoBox, err = video_box.New(channel.Url)
 	if err != nil {
 		panic(err)
 	}

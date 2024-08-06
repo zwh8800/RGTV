@@ -36,7 +36,7 @@ type ChannelInfo struct {
 	closeTimer *time.Timer
 }
 
-func NewChannelInfo() *ChannelInfo {
+func New() *ChannelInfo {
 	return &ChannelInfo{}
 }
 

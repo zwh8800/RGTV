@@ -45,7 +45,7 @@ type VideoBox struct {
 	pinner runtime.Pinner
 }
 
-func NewVideoBox(url string) (*VideoBox, error) {
+func New(url string) (*VideoBox, error) {
 	initAudio()
 
 	v := &VideoBox{
@@ -176,19 +176,8 @@ func (v *VideoBox) Dispose() {
 	}
 }
 
-func (v *VideoBox) VolumeUp() {
-	if v.audioVolume >= 10 {
-		v.audioVolume = 10
-		return
-	}
-	v.audioVolume++
-}
-func (v *VideoBox) VolumeDown() {
-	if v.audioVolume <= 0 {
-		v.audioVolume = 0
-		return
-	}
-	v.audioVolume--
+func (v *VideoBox) SetVolume(volume int) {
+	v.audioVolume = volume
 }
 
 var _ component.Component = (*VideoBox)(nil)

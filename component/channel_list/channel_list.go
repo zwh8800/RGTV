@@ -32,7 +32,7 @@ type ChannelList struct {
 	eventBus   evbus.Bus
 }
 
-func NewChannelList(channelData *model.ChannelData) *ChannelList {
+func New(channelData *model.ChannelData) *ChannelList {
 	return &ChannelList{
 		channelData: channelData,
 		eventBus:    evbus.New(),
