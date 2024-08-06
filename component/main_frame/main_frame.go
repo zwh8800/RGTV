@@ -33,6 +33,7 @@ func NewMainFrame() *MainFrame {
 	}
 	channelList := channel_list.NewChannelList(channelData)
 	channelInfo := channel_info.NewChannelInfo()
+	channelInfo.ChannelNumber = 1
 	channelInfo.ChannelName = channelData.Groups[0].Channels[0].Name
 
 	m := &MainFrame{
@@ -42,6 +43,7 @@ func NewMainFrame() *MainFrame {
 	}
 
 	m.channelList.OnChannelChange(m.OnChannelChange)
+	m.channelInfo.Show()
 
 	return m
 }
@@ -152,6 +154,7 @@ func (m *MainFrame) OnChannelChange(_ any) {
 	if err != nil {
 		panic(err)
 	}
+	m.channelInfo.ChannelNumber = channel.Index
 	m.channelInfo.ChannelName = channel.Name
 	m.channelInfo.Show()
 }

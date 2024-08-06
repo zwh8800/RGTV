@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	"github.com/jamesnetherton/m3u"
-	"github.com/wk8/go-ordered-map/v2"
+	orderedmap "github.com/wk8/go-ordered-map/v2"
 )
 
 type ChannelData struct {
@@ -17,11 +17,13 @@ type ChannelData struct {
 }
 
 type ChannelGroup struct {
+	Index    int
 	Name     string
 	Channels []*Channel
 }
 
 type Channel struct {
+	Index  int
 	Name   string
 	Url    string
 	Source string
@@ -49,6 +51,8 @@ func ParseChannelFromDIYP(path string) (*ChannelData, error) {
 
 	curGroup := "直播"
 	scanner := bufio.NewScanner(f)
+	groupIndex := 1
+	channelIndex := 1
 	for scanner.Scan() {
 		line := scanner.Text()
 		if strings.Contains(line, ",#genre#") {
@@ -70,16 +74,20 @@ func ParseChannelFromDIYP(path string) (*ChannelData, error) {
 			group, ok := groups.Get(curGroup)
 			if !ok {
 				groups.Set(curGroup, &ChannelGroup{
+					Index:    groupIndex,
 					Name:     curGroup,
 					Channels: make([]*Channel, 0),
 				})
 				group, _ = groups.Get(curGroup)
+				groupIndex++
 			}
 			group.Channels = append(group.Channels, &Channel{
+				Index:  channelIndex,
 				Name:   name,
 				Url:    url,
 				Source: source,
 			})
+			channelIndex++
 		}
 	}
 	channelData := &ChannelData{
