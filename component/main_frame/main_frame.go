@@ -164,6 +164,7 @@ func (m *MainFrame) OnChannelChange(_ any) {
 	if err != nil {
 		panic(err)
 	}
+	m.videoBox.SetVolume(m.volumeBar.GetVolume())
 	m.channelInfo.ChannelNumber = channel.Index
 	m.channelInfo.ChannelName = channel.Name
 	m.channelInfo.Show()
