@@ -63,6 +63,13 @@ func (em *ExitMask) Draw(renderer *sdl.Renderer) {
 		W: 640,
 		H: 480,
 	})
+	renderer.SetDrawColor(255, 255, 255, 255)
+	renderer.DrawRect(&sdl.Rect{
+		X: 0 + 1,
+		Y: 0 + 1,
+		W: 640 - 2,
+		H: 480 - 2,
+	})
 
 	textDrawer, err := text.GetDrawerFromData(embeddata.FontName, embeddata.FontData)
 	if err != nil {
