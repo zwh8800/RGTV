@@ -10,7 +10,7 @@ import (
 // DrawGoImage 将golang的image绘制到sdl.Renderer上
 func DrawGoImage(renderer *sdl.Renderer, img *image.RGBA, rectangle image.Rectangle) error {
 	// 将image.RGBA转换为sdl.Texture
-	texture, err := renderer.CreateTexture(sdl.PIXELFORMAT_RGBA8888, sdl.TEXTUREACCESS_STATIC,
+	texture, err := renderer.CreateTexture(sdl.PIXELFORMAT_ABGR8888, sdl.TEXTUREACCESS_STATIC,
 		int32(img.Bounds().Dx()), int32(img.Bounds().Dy()))
 	if err != nil {
 		return err

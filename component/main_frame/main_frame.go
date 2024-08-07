@@ -6,6 +6,7 @@ import (
 	channelinfo "github.com/zwh8800/RGTV/component/channel_info"
 	channellist "github.com/zwh8800/RGTV/component/channel_list"
 	exitmask "github.com/zwh8800/RGTV/component/exit_mask"
+	loadingbar "github.com/zwh8800/RGTV/component/loading_bar"
 	videobox "github.com/zwh8800/RGTV/component/video_box"
 	volumebar "github.com/zwh8800/RGTV/component/volume_bar"
 	"github.com/zwh8800/RGTV/conf"
@@ -19,6 +20,7 @@ type MainFrame struct {
 	channelInfo *channelinfo.ChannelInfo
 	volumeBar   *volumebar.VolumeBar
 	exitMask    *exitmask.ExitMask
+	loadingBar  *loadingbar.LoadingBar
 }
 
 func New() *MainFrame {
@@ -45,16 +47,21 @@ func New() *MainFrame {
 
 	exitMask := exitmask.New()
 
+	loadBar := loadingbar.New()
+
 	m := &MainFrame{
 		videoBox:    videoBox,
 		channelList: channelList,
 		channelInfo: channelInfo,
 		volumeBar:   volumeBar,
 		exitMask:    exitMask,
+		loadingBar:  loadBar,
 	}
 
 	m.channelList.OnChannelChange(m.OnChannelChange)
 	m.channelInfo.Show()
+
+	m.videoBox.OnVideoLag(m.OnVideoLag)
 
 	return m
 }
@@ -205,6 +212,7 @@ func (m *MainFrame) Draw(renderer *sdl.Renderer) {
 	m.channelInfo.Draw(renderer)
 	m.volumeBar.Draw(renderer)
 	m.exitMask.Draw(renderer)
+	m.loadingBar.Draw(renderer)
 	renderer.Present()
 }
 
@@ -223,9 +231,14 @@ func (m *MainFrame) OnChannelChange(_ any) {
 		panic(err)
 	}
 	m.videoBox.SetVolume(m.volumeBar.GetVolume())
+	m.videoBox.OnVideoLag(m.OnVideoLag)
 	m.channelInfo.ChannelNumber = channel.Index
 	m.channelInfo.ChannelName = channel.Name
 	m.channelInfo.Show()
+}
+
+func (m *MainFrame) OnVideoLag(_ any) {
+	m.loadingBar.Show()
 }
 
 var _ component.Component = (*MainFrame)(nil)

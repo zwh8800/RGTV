@@ -63,7 +63,7 @@ func audioCallback(userdata unsafe.Pointer, stream *C.char, len C.int) {
 	data := (*[1 << 30]byte)(unsafe.Pointer(stream))[:len:len]
 	_, err := v.audioBuf.Read(data)
 	if err != nil {
-		log.Println("audio buf empty")
+		return
 	}
 
 	linearVolume := math.Pow(10, volumeMap[v.audioVolume]/10)

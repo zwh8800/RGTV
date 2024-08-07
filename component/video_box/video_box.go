@@ -10,18 +10,23 @@ import (
 	"runtime"
 	"sync"
 	"sync/atomic"
+	"time"
 	"unsafe"
 
+	evbus "github.com/asaskevich/EventBus"
 	ffmpeg "github.com/u2takey/ffmpeg-go"
 	"github.com/veandco/go-sdl2/sdl"
 	"github.com/zwh8800/RGTV/component"
 	"github.com/zwh8800/RGTV/conf"
+	"github.com/zwh8800/RGTV/model"
 	"github.com/zwh8800/RGTV/util"
 )
 
 const (
 	videoBufSize = 640 * 480 * 3
 	audioBufSize = 4096 * 2 * 4 // 4倍sample buffer
+
+	eventLag = "VideoBox:Lag"
 )
 
 type VideoBox struct {
@@ -42,6 +47,11 @@ type VideoBox struct {
 
 	audioVolume int
 
+	lastFrame time.Time
+	stopChan  chan struct{}
+
+	eventBus evbus.Bus
+
 	pinner runtime.Pinner
 }
 
@@ -51,6 +61,8 @@ func New(url string) (*VideoBox, error) {
 	v := &VideoBox{
 		url:         url,
 		audioVolume: 5,
+		eventBus:    evbus.New(),
+		stopChan:    make(chan struct{}),
 	}
 
 	v.pinner.Pin(v)
@@ -72,6 +84,7 @@ func New(url string) (*VideoBox, error) {
 	go v.runFFMPEG(pw1, pw2)
 	go v.asyncReadVideo()
 	go v.asyncReadAudio()
+	go v.monitorLag()
 
 	vf.Set(v)
 	return v, nil
@@ -131,6 +144,7 @@ func (v *VideoBox) asyncReadVideo() {
 			return
 		}
 		v.videoBufIdx.Store(nextIdx)
+		v.lastFrame = time.Now()
 	}
 }
 
@@ -142,9 +156,22 @@ func (v *VideoBox) asyncReadAudio() {
 	}
 }
 
-func (v *VideoBox) HandleEvent(e sdl.Event) {
-
+func (v *VideoBox) monitorLag() {
+	ticker := time.NewTicker(100 * time.Millisecond)
+	defer ticker.Stop()
+	for {
+		select {
+		case <-ticker.C:
+			if time.Since(v.lastFrame) >= 100*time.Millisecond {
+				v.eventBus.Publish(eventLag, v)
+			}
+		case <-v.stopChan:
+			return
+		}
+	}
 }
+
+func (v *VideoBox) HandleEvent(e sdl.Event) {}
 
 func (v *VideoBox) Draw(renderer *sdl.Renderer) {
 	v.once.Do(func() {
@@ -174,10 +201,15 @@ func (v *VideoBox) Dispose() {
 	if v.cmd != nil && v.cmd.Process != nil {
 		v.cmd.Process.Kill()
 	}
+	close(v.stopChan)
 }
 
 func (v *VideoBox) SetVolume(volume int) {
 	v.audioVolume = volume
+}
+
+func (v *VideoBox) OnVideoLag(handler model.EventHandler) {
+	v.eventBus.Subscribe(eventLag, handler)
 }
 
 var _ component.Component = (*VideoBox)(nil)
