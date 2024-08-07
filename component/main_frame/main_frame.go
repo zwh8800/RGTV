@@ -140,6 +140,9 @@ func (m *MainFrame) buttonX() bool {
 	if m.channelList.IsShown() {
 		return false
 	}
+	if m.exitMask.IsShown() {
+		return false
+	}
 	m.channelInfo.Show()
 	return true
 }
@@ -175,12 +178,18 @@ func (m *MainFrame) hatDown() bool {
 }
 
 func (m *MainFrame) buttonVolumeUp() bool {
+	if m.exitMask.IsShown() {
+		return false
+	}
 	m.volumeBar.VolumeUp()
 	m.videoBox.SetVolume(m.volumeBar.GetVolume())
 	return true
 }
 
 func (m *MainFrame) buttonVolumeDown() bool {
+	if m.exitMask.IsShown() {
+		return false
+	}
 	m.volumeBar.VolumeDown()
 	m.videoBox.SetVolume(m.volumeBar.GetVolume())
 	return true
