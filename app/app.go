@@ -5,9 +5,8 @@ import (
 
 	"github.com/veandco/go-sdl2/sdl"
 	"github.com/zwh8800/RGTV/component"
-	"github.com/zwh8800/RGTV/component/main_frame"
+	mainframe "github.com/zwh8800/RGTV/component/main_frame"
 	"github.com/zwh8800/RGTV/conf"
-	"github.com/zwh8800/RGTV/consts"
 	"github.com/zwh8800/RGTV/util"
 )
 
@@ -59,7 +58,7 @@ func NewApp() (*App, error) {
 		renderer: renderer,
 		fpsm:     fpsm,
 
-		cur: main_frame.New(),
+		cur: mainframe.New(),
 	}, nil
 }
 
@@ -75,13 +74,7 @@ func (app *App) Run() {
 }
 
 func (app *App) handleEvent(e sdl.Event) {
-	switch event := e.(type) {
-	case *sdl.JoyButtonEvent:
-		if event.State == sdl.PRESSED {
-			if event.Button == consts.ButtonMenu {
-				app.running = false
-			}
-		}
+	switch e.(type) {
 	case *sdl.QuitEvent:
 		fmt.Println("Quit")
 		app.running = false

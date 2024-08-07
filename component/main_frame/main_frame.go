@@ -3,20 +3,22 @@ package main_frame
 import (
 	"github.com/veandco/go-sdl2/sdl"
 	"github.com/zwh8800/RGTV/component"
-	"github.com/zwh8800/RGTV/component/channel_info"
-	"github.com/zwh8800/RGTV/component/channel_list"
-	"github.com/zwh8800/RGTV/component/video_box"
-	"github.com/zwh8800/RGTV/component/volume_bar"
+	channelinfo "github.com/zwh8800/RGTV/component/channel_info"
+	channellist "github.com/zwh8800/RGTV/component/channel_list"
+	exitmask "github.com/zwh8800/RGTV/component/exit_mask"
+	videobox "github.com/zwh8800/RGTV/component/video_box"
+	volumebar "github.com/zwh8800/RGTV/component/volume_bar"
 	"github.com/zwh8800/RGTV/conf"
 	"github.com/zwh8800/RGTV/consts"
 	"github.com/zwh8800/RGTV/model"
 )
 
 type MainFrame struct {
-	videoBox    *video_box.VideoBox
-	channelList *channel_list.ChannelList
-	channelInfo *channel_info.ChannelInfo
-	volumeBar   *volume_bar.VolumeBar
+	videoBox    *videobox.VideoBox
+	channelList *channellist.ChannelList
+	channelInfo *channelinfo.ChannelInfo
+	volumeBar   *volumebar.VolumeBar
+	exitMask    *exitmask.ExitMask
 }
 
 func New() *MainFrame {
@@ -29,23 +31,26 @@ func New() *MainFrame {
 		}
 	}
 
-	videoBox, err := video_box.New(channelData.Groups[0].Channels[0].Url)
+	videoBox, err := videobox.New(channelData.Groups[0].Channels[0].Url)
 	if err != nil {
 		panic(err)
 	}
-	channelList := channel_list.New(channelData)
+	channelList := channellist.New(channelData)
 
-	channelInfo := channel_info.New()
+	channelInfo := channelinfo.New()
 	channelInfo.ChannelNumber = 1
 	channelInfo.ChannelName = channelData.Groups[0].Channels[0].Name
 
-	volumeBar := volume_bar.New()
+	volumeBar := volumebar.New()
+
+	exitMask := exitmask.New()
 
 	m := &MainFrame{
 		videoBox:    videoBox,
 		channelList: channelList,
 		channelInfo: channelInfo,
 		volumeBar:   volumeBar,
+		exitMask:    exitMask,
 	}
 
 	m.channelList.OnChannelChange(m.OnChannelChange)
@@ -55,6 +60,7 @@ func New() *MainFrame {
 }
 
 func (m *MainFrame) HandleEvent(e sdl.Event) {
+	captured := false
 	switch event := e.(type) {
 	case *sdl.JoyHatEvent:
 		if event.Value&sdl.HAT_UP != 0 {
@@ -62,80 +68,122 @@ func (m *MainFrame) HandleEvent(e sdl.Event) {
 		} else if event.Value&sdl.HAT_DOWN != 0 {
 			m.hatDown()
 		}
+
 	case *sdl.JoyButtonEvent:
 		if event.State == sdl.RELEASED {
 			if event.Button == consts.ButtonA {
-				m.buttonA()
+				captured = m.buttonA()
+			} else if event.Button == consts.ButtonB {
+				captured = m.buttonB()
 			} else if event.Button == consts.ButtonX {
-				m.buttonX()
+				captured = m.buttonX()
 			} else if event.Button == consts.ButtonVolumeUp {
-				m.buttonVolumeUp()
+				captured = m.buttonVolumeUp()
 			} else if event.Button == consts.ButtonVolumeDown {
-				m.buttonVolumeDown()
+				captured = m.buttonVolumeDown()
 			}
 		}
 
 	case *sdl.KeyboardEvent:
 		if event.Type == sdl.KEYUP {
 			if event.Keysym.Sym == sdl.K_UP {
-				m.hatUp()
+				captured = m.hatUp()
 			} else if event.Keysym.Sym == sdl.K_DOWN {
-				m.hatDown()
+				captured = m.hatDown()
 			} else if event.Keysym.Sym == sdl.K_a {
-				m.buttonA()
+				captured = m.buttonA()
+			} else if event.Keysym.Sym == sdl.K_b {
+				captured = m.buttonB()
 			} else if event.Keysym.Sym == sdl.K_x {
-				m.buttonX()
+				captured = m.buttonX()
 			} else if event.Keysym.Sym == sdl.K_u {
-				m.buttonVolumeUp()
+				captured = m.buttonVolumeUp()
 			} else if event.Keysym.Sym == sdl.K_d {
-				m.buttonVolumeDown()
+				captured = m.buttonVolumeDown()
 			}
 		}
+	}
+
+	if captured {
+		return
 	}
 
 	m.videoBox.HandleEvent(e)
 	m.channelList.HandleEvent(e)
 	m.channelInfo.HandleEvent(e)
+	m.exitMask.HandleEvent(e)
 }
 
-func (m *MainFrame) buttonA() {
-	if !m.channelList.IsShown() {
-		m.channelList.Show()
+func (m *MainFrame) buttonA() bool {
+	if m.channelList.IsShown() {
+		return false
 	}
+	if m.exitMask.IsShown() {
+		return false
+	}
+	m.channelList.Show()
+	return true
 }
 
-func (m *MainFrame) buttonX() {
+func (m *MainFrame) buttonB() bool {
+	if m.channelList.IsShown() {
+		return false
+	}
+	if m.exitMask.IsShown() {
+		return false
+	}
+	m.exitMask.Show()
+	return true
+}
+
+func (m *MainFrame) buttonX() bool {
+	if m.channelList.IsShown() {
+		return false
+	}
 	m.channelInfo.Show()
+	return true
 }
 
-func (m *MainFrame) hatUp() {
-	if !m.channelList.IsShown() {
-		if conf.GetConfig().RevertSwitchChannel {
-			m.channelList.MoveUp()
-		} else {
-			m.channelList.MoveDown()
-		}
+func (m *MainFrame) hatUp() bool {
+	if m.channelList.IsShown() {
+		return false
 	}
-}
-
-func (m *MainFrame) hatDown() {
-	if !m.channelList.IsShown() {
-		if conf.GetConfig().RevertSwitchChannel {
-			m.channelList.MoveDown()
-		} else {
-			m.channelList.MoveUp()
-		}
+	if m.exitMask.IsShown() {
+		return false
 	}
+	if conf.GetConfig().RevertSwitchChannel {
+		m.channelList.MoveUp()
+	} else {
+		m.channelList.MoveDown()
+	}
+	return true
 }
 
-func (m *MainFrame) buttonVolumeUp() {
+func (m *MainFrame) hatDown() bool {
+	if m.channelList.IsShown() {
+		return false
+	}
+	if m.exitMask.IsShown() {
+		return false
+	}
+	if conf.GetConfig().RevertSwitchChannel {
+		m.channelList.MoveDown()
+	} else {
+		m.channelList.MoveUp()
+	}
+	return true
+}
+
+func (m *MainFrame) buttonVolumeUp() bool {
 	m.volumeBar.VolumeUp()
 	m.videoBox.SetVolume(m.volumeBar.GetVolume())
+	return true
 }
 
-func (m *MainFrame) buttonVolumeDown() {
+func (m *MainFrame) buttonVolumeDown() bool {
 	m.volumeBar.VolumeDown()
 	m.videoBox.SetVolume(m.volumeBar.GetVolume())
+	return true
 }
 
 func (m *MainFrame) Draw(renderer *sdl.Renderer) {
@@ -147,6 +195,7 @@ func (m *MainFrame) Draw(renderer *sdl.Renderer) {
 	m.channelList.Draw(renderer)
 	m.channelInfo.Draw(renderer)
 	m.volumeBar.Draw(renderer)
+	m.exitMask.Draw(renderer)
 	renderer.Present()
 }
 
@@ -160,7 +209,7 @@ func (m *MainFrame) OnChannelChange(_ any) {
 	_, channel := m.channelList.GetCurChannel()
 	m.videoBox.Dispose()
 	var err error
-	m.videoBox, err = video_box.New(channel.Url)
+	m.videoBox, err = videobox.New(channel.Url)
 	if err != nil {
 		panic(err)
 	}
