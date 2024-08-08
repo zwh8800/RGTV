@@ -97,7 +97,7 @@ func (c *LoadingBar) drawText(renderer *sdl.Renderer) {
 			R: 255,
 			G: 255,
 			B: 255,
-			A: uint8(alpha),
+			A: alpha,
 		}))
 		if err != nil {
 			panic(err)
