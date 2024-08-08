@@ -105,16 +105,13 @@ func (c *LoadingBar) drawText(renderer *sdl.Renderer) {
 
 		x := (640-txtLen*img.Bounds().Dx())/2 + i*img.Bounds().Dx()
 
-		err = util.DrawGoImage(renderer, img,
+		util.DrawGoImage(renderer, img,
 			image.Rect(
 				x,
 				int(y),
 				x+img.Bounds().Dx(),
 				int(y)+img.Bounds().Dy(),
 			))
-		if err != nil {
-			panic(err)
-		}
 	}
 
 }

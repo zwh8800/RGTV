@@ -89,16 +89,13 @@ func (em *ExitMask) drawExitMsg(renderer *sdl.Renderer, textDrawer *text.Drawer)
 	x := (640 - img.Bounds().Dx()) / 2
 	y := (480-img.Bounds().Dy())/2 - 40
 
-	err = util.DrawGoImage(renderer, img,
+	util.DrawGoImage(renderer, img,
 		image.Rect(
 			x,
 			y,
 			x+img.Bounds().Dx(),
 			y+img.Bounds().Dy(),
 		))
-	if err != nil {
-		panic(err)
-	}
 }
 
 func (em *ExitMask) drawExitButton(renderer *sdl.Renderer, textDrawer *text.Drawer) {
@@ -110,16 +107,13 @@ func (em *ExitMask) drawExitButton(renderer *sdl.Renderer, textDrawer *text.Draw
 	x := (640 - img.Bounds().Dx()) / 2
 	y := (480-img.Bounds().Dy())/2 + 60
 
-	err = util.DrawGoImage(renderer, img,
+	util.DrawGoImage(renderer, img,
 		image.Rect(
 			x,
 			y,
 			x+img.Bounds().Dx(),
 			y+img.Bounds().Dy(),
 		))
-	if err != nil {
-		panic(err)
-	}
 }
 
 func (em *ExitMask) Dispose() {}

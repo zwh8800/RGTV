@@ -203,10 +203,7 @@ func (m *MainFrame) buttonVolumeDown() bool {
 }
 
 func (m *MainFrame) Draw(renderer *sdl.Renderer) {
-	err := renderer.Clear()
-	if err != nil {
-		panic(err)
-	}
+	renderer.Clear()
 	m.videoBox.Draw(renderer)
 	m.channelList.Draw(renderer)
 	m.channelInfo.Draw(renderer)

@@ -73,16 +73,13 @@ func (c *ChannelInfo) drawChannelNumber(renderer *sdl.Renderer, textDrawer *text
 	x := posX + (channelNameWidth-img.Bounds().Dx())/2
 	y := posY + (height/2-img.Bounds().Dy())/2 + 10
 
-	err = util.DrawGoImage(renderer, img,
+	util.DrawGoImage(renderer, img,
 		image.Rect(
 			x,
 			y,
 			x+img.Bounds().Dx(),
 			y+img.Bounds().Dy(),
 		))
-	if err != nil {
-		panic(err)
-	}
 }
 
 func (c *ChannelInfo) drawChannelName(renderer *sdl.Renderer, textDrawer *text.Drawer) {
@@ -94,16 +91,13 @@ func (c *ChannelInfo) drawChannelName(renderer *sdl.Renderer, textDrawer *text.D
 	x := posX + (channelNameWidth-img.Bounds().Dx())/2
 	y := midY + (height/2-img.Bounds().Dy())/2 - 10
 
-	err = util.DrawGoImage(renderer, img,
+	util.DrawGoImage(renderer, img,
 		image.Rect(
 			x,
 			y,
 			x+img.Bounds().Dx(),
 			y+img.Bounds().Dy(),
 		))
-	if err != nil {
-		panic(err)
-	}
 }
 
 func (c *ChannelInfo) drawCurProgram(renderer *sdl.Renderer, textDrawer *text.Drawer) {
@@ -117,16 +111,13 @@ func (c *ChannelInfo) drawCurProgram(renderer *sdl.Renderer, textDrawer *text.Dr
 	x := posX + channelNameWidth + 20
 	y := posY + (height/2-img.Bounds().Dy())/2 + 10
 
-	err = util.DrawGoImage(renderer, img,
+	util.DrawGoImage(renderer, img,
 		image.Rect(
 			x,
 			y,
 			x+img.Bounds().Dx(),
 			y+img.Bounds().Dy(),
 		))
-	if err != nil {
-		panic(err)
-	}
 }
 
 func (c *ChannelInfo) drawNextProgram(renderer *sdl.Renderer, textDrawer *text.Drawer) {
@@ -140,16 +131,13 @@ func (c *ChannelInfo) drawNextProgram(renderer *sdl.Renderer, textDrawer *text.D
 	x := posX + channelNameWidth + 20
 	y := midY + (height/2-img.Bounds().Dy())/2 - 10
 
-	err = util.DrawGoImage(renderer, img,
+	util.DrawGoImage(renderer, img,
 		image.Rect(
 			x,
 			y,
 			x+img.Bounds().Dx(),
 			y+img.Bounds().Dy(),
 		))
-	if err != nil {
-		panic(err)
-	}
 }
 
 func (c *ChannelInfo) drawHelp(renderer *sdl.Renderer, textDrawer *text.Drawer) {
@@ -163,16 +151,13 @@ func (c *ChannelInfo) drawHelp(renderer *sdl.Renderer, textDrawer *text.Drawer) 
 	x := posX + channelNameWidth + 20
 	y := posY + height - 20
 
-	err = util.DrawGoImage(renderer, img,
+	util.DrawGoImage(renderer, img,
 		image.Rect(
 			x,
 			y,
 			x+img.Bounds().Dx(),
 			y+img.Bounds().Dy(),
 		))
-	if err != nil {
-		panic(err)
-	}
 }
 
 func (c *ChannelInfo) drawSplitLine(renderer *sdl.Renderer) {
@@ -213,9 +198,7 @@ func (c *ChannelInfo) drawBorder(renderer *sdl.Renderer) {
 	})
 }
 
-func (c *ChannelInfo) Dispose() {
-
-}
+func (c *ChannelInfo) Dispose() {}
 
 func (c *ChannelInfo) Show() {
 	c.shown = true

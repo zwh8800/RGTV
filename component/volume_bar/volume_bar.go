@@ -66,16 +66,13 @@ func (v *VolumeBar) Draw(renderer *sdl.Renderer) {
 		H: int32(img.Bounds().Dy()+40) - 2,
 	})
 
-	err = util.DrawGoImage(renderer, img,
+	util.DrawGoImage(renderer, img,
 		image.Rect(
 			x,
 			y,
 			x+img.Bounds().Dx(),
 			y+img.Bounds().Dy(),
 		))
-	if err != nil {
-		panic(err)
-	}
 }
 
 func (v *VolumeBar) GetVolume() int {

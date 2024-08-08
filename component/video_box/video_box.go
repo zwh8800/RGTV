@@ -182,14 +182,8 @@ func (v *VideoBox) Draw(renderer *sdl.Renderer) {
 		v.texture = texture
 	})
 
-	err := v.texture.Update(nil, unsafe.Pointer(&v.videoBuf[v.videoBufIdx.Load()][0]), 640*3)
-	if err != nil {
-		panic(err)
-	}
-	err = renderer.Copy(v.texture, nil, nil)
-	if err != nil {
-		panic(err)
-	}
+	v.texture.Update(nil, unsafe.Pointer(&v.videoBuf[v.videoBufIdx.Load()][0]), 640*3)
+	renderer.Copy(v.texture, nil, nil)
 }
 
 func (v *VideoBox) Dispose() {
