@@ -3,9 +3,7 @@ package loading_bar
 import (
 	"image"
 	"image/color"
-	"image/png"
 	"math"
-	"os"
 	"time"
 
 	"github.com/veandco/go-sdl2/sdl"
@@ -104,10 +102,6 @@ func (c *LoadingBar) drawText(renderer *sdl.Renderer) {
 		if err != nil {
 			panic(err)
 		}
-
-		outFile, _ := os.Create("output.png")
-		png.Encode(outFile, img)
-		outFile.Close()
 
 		x := (640-txtLen*img.Bounds().Dx())/2 + i*img.Bounds().Dx()
 
