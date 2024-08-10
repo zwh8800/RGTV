@@ -34,6 +34,9 @@ func init() {
 	if config.FFMPEGPath == "" {
 		config.FFMPEGPath = "ffmpeg"
 	}
+	if config.EPGUrl == "" {
+		config.EPGUrl = "http://epg.112114.xyz/"
+	}
 }
 
 func GetConfig() Type {

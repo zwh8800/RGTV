@@ -12,6 +12,7 @@ import (
 	"github.com/zwh8800/RGTV/conf"
 	"github.com/zwh8800/RGTV/consts"
 	"github.com/zwh8800/RGTV/model"
+	"github.com/zwh8800/RGTV/util"
 )
 
 type MainFrame struct {
@@ -42,6 +43,10 @@ func New() *MainFrame {
 	channelInfo := channelinfo.New()
 	channelInfo.ChannelNumber = 1
 	channelInfo.ChannelName = channelData.Groups[0].Channels[0].Name
+	go func() {
+		channelInfo.CurrentProgram = util.GetCurrentProgram(channelInfo.ChannelName)
+		channelInfo.NextProgram = util.GetNextProgram(channelInfo.ChannelName)
+	}()
 
 	volumeBar := volumebar.New()
 
@@ -60,8 +65,6 @@ func New() *MainFrame {
 
 	m.channelList.OnChannelChange(m.OnChannelChange)
 	m.channelInfo.Show()
-
-	m.videoBox.OnVideoLag(m.OnVideoLag)
 
 	return m
 }
@@ -231,6 +234,10 @@ func (m *MainFrame) OnChannelChange(_ any) {
 	m.videoBox.OnVideoLag(m.OnVideoLag)
 	m.channelInfo.ChannelNumber = channel.Index
 	m.channelInfo.ChannelName = channel.Name
+	go func() {
+		m.channelInfo.CurrentProgram = util.GetCurrentProgram(channel.Name)
+		m.channelInfo.NextProgram = util.GetNextProgram(channel.Name)
+	}()
 	m.channelInfo.Show()
 }
 
