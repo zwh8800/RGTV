@@ -19,6 +19,14 @@ const (
 	channelListCloseTimeout = 10 * time.Second
 )
 
+const (
+	posX      = 0
+	posY      = 0
+	width     = 200
+	height    = 480
+	splitPosX = 50
+)
+
 type ChannelList struct {
 	channelData *model.ChannelData
 
@@ -47,31 +55,97 @@ func (c *ChannelList) HandleEvent(e sdl.Event) {
 	switch event := e.(type) {
 	case *sdl.JoyHatEvent:
 		if event.Value&sdl.HAT_LEFT != 0 {
-
+			c.hatLeft()
 		} else if event.Value&sdl.HAT_RIGHT != 0 {
-
+			c.hatRight()
 		} else if event.Value&sdl.HAT_UP != 0 {
-			c.closeTimer.Reset(channelListCloseTimeout)
-
+			c.hatUp()
 		} else if event.Value&sdl.HAT_DOWN != 0 {
-			c.closeTimer.Reset(channelListCloseTimeout)
-
+			c.hatDown()
 		}
-	case *sdl.JoyButtonEvent:
-		if event.State == sdl.PRESSED {
-			if event.Button == consts.ButtonA {
 
+	case *sdl.JoyButtonEvent:
+		if event.State == sdl.RELEASED {
+			if event.Button == consts.ButtonA {
+				c.buttonA()
 			} else if event.Button == consts.ButtonB {
-				c.Hide()
+				c.buttonB()
+			}
+		}
+	case *sdl.KeyboardEvent:
+		if event.Type == sdl.KEYUP {
+			if event.Keysym.Sym == sdl.K_LEFT {
+				c.hatLeft()
+			} else if event.Keysym.Sym == sdl.K_RIGHT {
+				c.hatRight()
+			} else if event.Keysym.Sym == sdl.K_UP {
+				c.hatUp()
+			} else if event.Keysym.Sym == sdl.K_DOWN {
+				c.hatDown()
+			} else if event.Keysym.Sym == sdl.K_a {
+				c.buttonA()
+			} else if event.Keysym.Sym == sdl.K_b {
+				c.buttonB()
 			}
 		}
 	}
+}
+
+func (c *ChannelList) hatLeft() {
+	c.closeTimer.Reset(channelListCloseTimeout)
+}
+
+func (c *ChannelList) hatRight() {
+	c.closeTimer.Reset(channelListCloseTimeout)
+}
+
+func (c *ChannelList) hatUp() {
+	c.closeTimer.Reset(channelListCloseTimeout)
+}
+
+func (c *ChannelList) hatDown() {
+	c.closeTimer.Reset(channelListCloseTimeout)
+
+}
+
+func (c *ChannelList) buttonA() {
+	c.closeTimer.Reset(channelListCloseTimeout)
+
+}
+
+func (c *ChannelList) buttonB() {
+	c.Hide()
 }
 
 func (c *ChannelList) Draw(renderer *sdl.Renderer) {
 	if !c.shown {
 		return
 	}
+	c.drawBorder(renderer)
+	c.drawSplitLine(renderer)
+}
+
+func (c *ChannelList) drawBorder(renderer *sdl.Renderer) {
+	renderer.SetDrawColor(0, 0, 0, 128)
+	renderer.FillRect(&sdl.Rect{
+		X: posX,
+		Y: posY,
+		W: width,
+		H: height,
+	})
+
+	renderer.SetDrawColor(255, 255, 255, 255)
+	renderer.DrawRect(&sdl.Rect{
+		X: posX + 1,
+		Y: posY + 1,
+		W: width - 2,
+		H: height - 2,
+	})
+}
+
+func (c *ChannelList) drawSplitLine(renderer *sdl.Renderer) {
+	renderer.SetDrawColor(255, 255, 255, 255)
+	renderer.DrawLine(splitPosX, posY, splitPosX, posY+height)
 }
 
 func (c *ChannelList) Dispose() {

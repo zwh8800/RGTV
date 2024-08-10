@@ -2,12 +2,12 @@ package util
 
 import (
 	"fmt"
-	"github.com/zwh8800/RGTV/conf"
 	"net/http"
 	"time"
 
 	"github.com/go-resty/resty/v2"
 	gocache "github.com/patrickmn/go-cache"
+	"github.com/zwh8800/RGTV/conf"
 	"github.com/zwh8800/RGTV/model"
 )
 

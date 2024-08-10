@@ -74,9 +74,9 @@ func (m *MainFrame) HandleEvent(e sdl.Event) {
 	switch event := e.(type) {
 	case *sdl.JoyHatEvent:
 		if event.Value&sdl.HAT_UP != 0 {
-			m.hatUp()
+			captured = m.hatUp()
 		} else if event.Value&sdl.HAT_DOWN != 0 {
-			m.hatDown()
+			captured = m.hatDown()
 		}
 
 	case *sdl.JoyButtonEvent:
