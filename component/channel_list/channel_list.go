@@ -2,6 +2,7 @@ package channel_list
 
 import (
 	"image"
+	"image/color"
 	"time"
 
 	evbus "github.com/asaskevich/EventBus"
@@ -24,12 +25,18 @@ const (
 )
 
 const (
-	posX       = 0
-	posY       = 0
-	width      = 200
-	height     = 480
-	splitPosX  = 50
-	genreCount = 5
+	posX         = 0
+	posY         = 0
+	width        = 240
+	height       = 480
+	genreWidth   = 70
+	channelWidth = width - genreWidth
+	genreCount   = 9
+	channelCount = 7
+)
+
+var (
+	colorActive = color.RGBA{66, 144, 245, 204}
 )
 
 type ChannelList struct {
@@ -39,6 +46,7 @@ type ChannelList struct {
 	selectedChannel int
 	playingGroup    int
 	playingChannel  int
+	focusOnGenre    bool
 
 	shown      bool
 	closeTimer *time.Timer
@@ -98,24 +106,58 @@ func (c *ChannelList) HandleEvent(e sdl.Event) {
 
 func (c *ChannelList) hatLeft() {
 	c.closeTimer.Reset(channelListCloseTimeout)
+	c.focusOnGenre = true
 }
 
 func (c *ChannelList) hatRight() {
 	c.closeTimer.Reset(channelListCloseTimeout)
+	c.focusOnGenre = false
 }
 
 func (c *ChannelList) hatUp() {
 	c.closeTimer.Reset(channelListCloseTimeout)
+	if c.focusOnGenre {
+		c.selectedGroup--
+		c.selectedGroup %= len(c.channelData.Groups)
+	} else {
+		c.selectedChannel--
+		if c.selectedChannel < 0 {
+			c.selectedGroup--
+			if c.selectedGroup < 0 {
+				c.selectedGroup = len(c.channelData.Groups) - 1
+			}
+			c.selectedChannel = len(c.channelData.Groups[c.selectedGroup].Channels) - 1
+		}
+	}
 }
 
 func (c *ChannelList) hatDown() {
 	c.closeTimer.Reset(channelListCloseTimeout)
-
+	if c.focusOnGenre {
+		c.selectedGroup++
+		c.selectedGroup %= len(c.channelData.Groups)
+	} else {
+		c.selectedChannel++
+		if c.selectedChannel >= len(c.channelData.Groups[c.selectedGroup].Channels) {
+			c.selectedGroup++
+			if c.selectedGroup >= len(c.channelData.Groups) {
+				c.selectedGroup = 0
+			}
+			c.selectedChannel = 0
+		}
+	}
 }
 
 func (c *ChannelList) buttonA() {
 	c.closeTimer.Reset(channelListCloseTimeout)
-
+	if c.focusOnGenre {
+		c.focusOnGenre = false
+	} else {
+		c.playingChannel = c.selectedChannel
+		c.playingGroup = c.selectedGroup
+		c.eventBus.Publish(eventChannelChange, c)
+		c.Hide()
+	}
 }
 
 func (c *ChannelList) buttonB() {
@@ -132,6 +174,8 @@ func (c *ChannelList) Draw(renderer *sdl.Renderer) {
 	}
 	c.drawBorder(renderer)
 	c.drawSplitLine(renderer)
+	c.drawGenre(renderer, textDrawer)
+	c.drawChannel(renderer, textDrawer)
 }
 
 func (c *ChannelList) drawBorder(renderer *sdl.Renderer) {
@@ -154,31 +198,90 @@ func (c *ChannelList) drawBorder(renderer *sdl.Renderer) {
 
 func (c *ChannelList) drawSplitLine(renderer *sdl.Renderer) {
 	renderer.SetDrawColor(255, 255, 255, 255)
-	renderer.DrawLine(splitPosX, posY, splitPosX, posY+height)
+	renderer.DrawLine(genreWidth, posY+1, genreWidth, posY+height-2)
 }
 
 func (c *ChannelList) drawGenre(renderer *sdl.Renderer, textDrawer *text.Drawer) {
 	genreHeight := height / genreCount
 	drawCount := min(len(c.channelData.Groups), genreCount)
-	startGroupIdx := min(max(0, c.selectedGroup-genreCount/2), len(c.channelData.Groups)-genreCount)
+	startGroupIdx := min(max(0, c.selectedGroup-genreCount/2), max(0, len(c.channelData.Groups)-genreCount))
 	for i := 0; i < drawCount; i++ {
-		iPosX := posX + 2
-		iPosY := posY + i*genreHeight + 2
+		idx := startGroupIdx + i
+
+		iPosX := posX
+		iPosY := posY + i*genreHeight
+		renderer.SetDrawColor(255, 255, 255, 255)
 		renderer.DrawRect(&sdl.Rect{
-			X: int32(iPosX),
-			Y: int32(iPosY),
-			W: int32(splitPosX - 4),
-			H: int32(genreHeight - 4),
+			X: int32(iPosX + 4),
+			Y: int32(iPosY + 4),
+			W: int32(genreWidth - 8),
+			H: int32(genreHeight - 8),
 		})
 
-		group := c.channelData.Groups[startGroupIdx+i]
+		if idx == c.selectedGroup && c.focusOnGenre {
+			renderer.SetDrawColor(colorActive.R, colorActive.G, colorActive.B, colorActive.A)
+			renderer.FillRect(&sdl.Rect{
+				X: int32(iPosX + 6),
+				Y: int32(iPosY + 6),
+				W: int32(genreWidth - 12),
+				H: int32(genreHeight - 12),
+			})
+		}
 
-		img, err := textDrawer.Draw(group.Name, 32, image.White)
+		group := c.channelData.Groups[idx]
+
+		img, err := textDrawer.Draw(group.Name, 16, image.White)
 		if err != nil {
 			panic(err)
 		}
-		x := iPosX + (splitPosX-img.Bounds().Dx())/2
+		x := iPosX + (genreWidth-img.Bounds().Dx())/2
 		y := iPosY + (genreHeight-img.Bounds().Dy())/2
+		util.DrawGoImage(renderer, img,
+			image.Rect(
+				x,
+				y,
+				x+img.Bounds().Dx(),
+				y+img.Bounds().Dy(),
+			))
+	}
+}
+
+func (c *ChannelList) drawChannel(renderer *sdl.Renderer, textDrawer *text.Drawer) {
+	channelHeight := height / channelCount
+	drawCount := min(len(c.channelData.Groups[c.selectedGroup].Channels), channelCount)
+	startGroupIdx := min(max(0, c.selectedChannel-channelCount/2), max(0, len(c.channelData.Groups[c.selectedGroup].Channels)-channelCount))
+	for i := 0; i < drawCount; i++ {
+		idx := startGroupIdx + i
+
+		iPosX := genreWidth
+		iPosY := posY + i*channelHeight
+
+		renderer.SetDrawColor(255, 255, 255, 255)
+		renderer.DrawRect(&sdl.Rect{
+			X: int32(iPosX + 4),
+			Y: int32(iPosY + 4),
+			W: int32(channelWidth - 8),
+			H: int32(channelHeight - 8),
+		})
+
+		if idx == c.selectedChannel && !c.focusOnGenre {
+			renderer.SetDrawColor(colorActive.R, colorActive.G, colorActive.B, colorActive.A)
+			renderer.FillRect(&sdl.Rect{
+				X: int32(iPosX + 6),
+				Y: int32(iPosY + 6),
+				W: int32(channelWidth - 12),
+				H: int32(channelHeight - 12),
+			})
+		}
+
+		channel := c.channelData.Groups[c.selectedGroup].Channels[idx]
+
+		img, err := textDrawer.Draw(channel.Name, 20, image.White)
+		if err != nil {
+			panic(err)
+		}
+		x := iPosX + (channelWidth-img.Bounds().Dx())/2
+		y := iPosY + (channelHeight-img.Bounds().Dy())/2
 		util.DrawGoImage(renderer, img,
 			image.Rect(
 				x,

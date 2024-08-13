@@ -132,6 +132,7 @@ func (m *MainFrame) buttonA() bool {
 		return false
 	}
 	m.channelList.Show()
+	m.channelInfo.Hide()
 	return true
 }
 
@@ -143,6 +144,7 @@ func (m *MainFrame) buttonB() bool {
 		return false
 	}
 	m.exitMask.Show()
+	m.channelInfo.Hide()
 	return true
 }
 
