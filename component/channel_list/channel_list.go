@@ -230,7 +230,7 @@ func (c *ChannelList) drawGenre(renderer *sdl.Renderer, textDrawer *text.Drawer)
 
 		group := c.channelData.Groups[idx]
 
-		img, err := textDrawer.Draw(group.Name, 16, image.White)
+		img, err := textDrawer.Draw(group.Name, 12, image.White)
 		if err != nil {
 			panic(err)
 		}
