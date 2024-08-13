@@ -1,6 +1,8 @@
 package util
 
-import "math"
+import (
+	"math"
+)
 
 // CubicBezier calculates the cubic Bezier curve value for a given t
 func CubicBezier(t, p0, p1, p2, p3 float64) float64 {

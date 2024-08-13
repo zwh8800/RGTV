@@ -1,13 +1,17 @@
 package channel_list
 
 import (
+	"image"
 	"time"
 
 	evbus "github.com/asaskevich/EventBus"
 	"github.com/veandco/go-sdl2/sdl"
 	"github.com/zwh8800/RGTV/component"
 	"github.com/zwh8800/RGTV/consts"
+	"github.com/zwh8800/RGTV/embeddata"
 	"github.com/zwh8800/RGTV/model"
+	"github.com/zwh8800/RGTV/text"
+	"github.com/zwh8800/RGTV/util"
 )
 
 const (
@@ -20,11 +24,12 @@ const (
 )
 
 const (
-	posX      = 0
-	posY      = 0
-	width     = 200
-	height    = 480
-	splitPosX = 50
+	posX       = 0
+	posY       = 0
+	width      = 200
+	height     = 480
+	splitPosX  = 50
+	genreCount = 5
 )
 
 type ChannelList struct {
@@ -121,6 +126,10 @@ func (c *ChannelList) Draw(renderer *sdl.Renderer) {
 	if !c.shown {
 		return
 	}
+	textDrawer, err := text.GetDrawerFromData(embeddata.FontName, embeddata.FontData)
+	if err != nil {
+		panic(err)
+	}
 	c.drawBorder(renderer)
 	c.drawSplitLine(renderer)
 }
@@ -146,6 +155,38 @@ func (c *ChannelList) drawBorder(renderer *sdl.Renderer) {
 func (c *ChannelList) drawSplitLine(renderer *sdl.Renderer) {
 	renderer.SetDrawColor(255, 255, 255, 255)
 	renderer.DrawLine(splitPosX, posY, splitPosX, posY+height)
+}
+
+func (c *ChannelList) drawGenre(renderer *sdl.Renderer, textDrawer *text.Drawer) {
+	genreHeight := height / genreCount
+	drawCount := min(len(c.channelData.Groups), genreCount)
+	startGroupIdx := min(max(0, c.selectedGroup-genreCount/2), len(c.channelData.Groups)-genreCount)
+	for i := 0; i < drawCount; i++ {
+		iPosX := posX + 2
+		iPosY := posY + i*genreHeight + 2
+		renderer.DrawRect(&sdl.Rect{
+			X: int32(iPosX),
+			Y: int32(iPosY),
+			W: int32(splitPosX - 4),
+			H: int32(genreHeight - 4),
+		})
+
+		group := c.channelData.Groups[startGroupIdx+i]
+
+		img, err := textDrawer.Draw(group.Name, 32, image.White)
+		if err != nil {
+			panic(err)
+		}
+		x := iPosX + (splitPosX-img.Bounds().Dx())/2
+		y := iPosY + (genreHeight-img.Bounds().Dy())/2
+		util.DrawGoImage(renderer, img,
+			image.Rect(
+				x,
+				y,
+				x+img.Bounds().Dx(),
+				y+img.Bounds().Dy(),
+			))
+	}
 }
 
 func (c *ChannelList) Dispose() {
