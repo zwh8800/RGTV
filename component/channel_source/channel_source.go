@@ -1,6 +1,7 @@
 package channel_source
 
 import (
+	"image"
 	"time"
 
 	evbus "github.com/asaskevich/EventBus"
@@ -9,6 +10,7 @@ import (
 	"github.com/zwh8800/RGTV/embeddata"
 	"github.com/zwh8800/RGTV/model"
 	"github.com/zwh8800/RGTV/text"
+	"github.com/zwh8800/RGTV/util"
 )
 
 const (
@@ -20,13 +22,8 @@ const (
 )
 
 const (
-	maxTextWidth    = 6
-	maxTextWidthCap = 8
-	shadowWidth     = 3
-)
-
-var (
-	shadowAlpha = [shadowWidth]int{50, 128, 180}
+	maxTextWidth = 6
+	posY         = 10
 )
 
 type ChannelSource struct {
@@ -57,21 +54,24 @@ func (c *ChannelSource) Draw(renderer *sdl.Renderer) {
 		panic(err)
 	}
 
-	var drawTexts [3]string
-	for i := 0; i < 3; i++ {
-		idx := c.sourceIdx + i - 1
-		if idx < 0 && idx >= len(c.channel.Sources) {
-			continue
-		}
-		source := []rune(c.channel.Sources[idx].Name)
-		if len(source) > maxTextWidth {
-			source = append(source[:maxTextWidth], '…', '…')
-		}
-		drawTexts[i] = string(source)
-
-		// TODO: draw text
+	name := []rune(c.channel.Sources[c.sourceIdx].Name)
+	if len(name) > maxTextWidth {
+		name = append(name[:maxTextWidth], '…', '…')
 	}
 
+	img, err := textDrawer.Draw(string(name), 24, image.White)
+	if err != nil {
+		panic(err)
+	}
+	x := (640 - img.Bounds().Dx()) / 2
+	y := posY
+	util.DrawGoImage(renderer, img,
+		image.Rect(
+			x,
+			y,
+			x+img.Bounds().Dx(),
+			y+img.Bounds().Dy(),
+		))
 }
 
 func (c *ChannelSource) Show() {
