@@ -13,6 +13,10 @@ import (
 	orderedmap "github.com/wk8/go-ordered-map/v2"
 )
 
+const (
+	defaultSource = "默认线路"
+)
+
 type ChannelData struct {
 	Groups []*ChannelGroup
 }
@@ -43,6 +47,11 @@ func (s sortByName) Swap(i, j int) {
 	s[i], s[j] = s[j], s[i]
 }
 func (s sortByName) Less(i, j int) bool {
+	if s[i].Name == defaultSource {
+		return true
+	} else if s[j].Name == defaultSource {
+		return false
+	}
 	return s[i].Name < s[j].Name
 }
 
@@ -82,7 +91,7 @@ func ParseChannelFromDIYP(path string) (*ChannelData, error) {
 			}
 			name := part[0]
 			url := part[1]
-			source := "默认线路"
+			source := defaultSource
 			part2 := strings.Split(url, "$")
 			if len(part2) == 2 {
 				url = part2[0]

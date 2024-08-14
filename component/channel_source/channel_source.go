@@ -96,7 +96,7 @@ func (c *ChannelSource) SetChannel(channel *model.Channel) {
 func (c *ChannelSource) NextSource() {
 	c.sourceIdx++
 	if c.sourceIdx >= len(c.channel.Sources) {
-		c.sourceIdx = len(c.channel.Sources)
+		c.sourceIdx = len(c.channel.Sources) - 1
 	}
 	c.Show()
 	c.eventBus.Publish(eventSourceChange, c)
@@ -113,7 +113,7 @@ func (c *ChannelSource) PrevSource() {
 
 func (c *ChannelSource) GetSource() *model.Source {
 	if c.sourceIdx >= len(c.channel.Sources) {
-		return nil
+		c.sourceIdx = len(c.channel.Sources) - 1
 	}
 	return c.channel.Sources[c.sourceIdx]
 }

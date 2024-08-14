@@ -136,7 +136,10 @@ func (m *MainFrame) HandleEvent(e sdl.Event) {
 	m.videoBox.HandleEvent(e)
 	m.channelList.HandleEvent(e)
 	m.channelInfo.HandleEvent(e)
+	m.volumeBar.HandleEvent(e)
 	m.exitMask.HandleEvent(e)
+	m.loadingBar.HandleEvent(e)
+	m.channelSource.HandleEvent(e)
 }
 
 func (m *MainFrame) buttonA() bool {
@@ -254,6 +257,7 @@ func (m *MainFrame) Draw(renderer *sdl.Renderer) {
 	m.volumeBar.Draw(renderer)
 	m.exitMask.Draw(renderer)
 	m.loadingBar.Draw(renderer)
+	m.channelSource.Draw(renderer)
 	renderer.Present()
 }
 
