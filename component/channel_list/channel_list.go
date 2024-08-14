@@ -119,6 +119,7 @@ func (c *ChannelList) hatUp() {
 	if c.focusOnGenre {
 		c.selectedGroup--
 		c.selectedGroup %= len(c.channelData.Groups)
+		c.selectedChannel = 0
 	} else {
 		c.selectedChannel--
 		if c.selectedChannel < 0 {
@@ -136,6 +137,7 @@ func (c *ChannelList) hatDown() {
 	if c.focusOnGenre {
 		c.selectedGroup++
 		c.selectedGroup %= len(c.channelData.Groups)
+		c.selectedChannel = 0
 	} else {
 		c.selectedChannel++
 		if c.selectedChannel >= len(c.channelData.Groups[c.selectedGroup].Channels) {
