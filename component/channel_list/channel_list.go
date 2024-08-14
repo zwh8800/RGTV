@@ -36,7 +36,8 @@ const (
 )
 
 var (
-	colorActive = color.RGBA{66, 144, 245, 204}
+	colorSelectd = color.RGBA{255, 255, 255, 100}
+	colorActive  = color.RGBA{66, 144, 245, 204}
 )
 
 type ChannelList struct {
@@ -220,8 +221,12 @@ func (c *ChannelList) drawGenre(renderer *sdl.Renderer, textDrawer *text.Drawer)
 			H: int32(genreHeight - 8),
 		})
 
-		if idx == c.selectedGroup && c.focusOnGenre {
-			renderer.SetDrawColor(colorActive.R, colorActive.G, colorActive.B, colorActive.A)
+		if idx == c.selectedGroup {
+			if c.focusOnGenre {
+				renderer.SetDrawColor(colorActive.R, colorActive.G, colorActive.B, colorActive.A)
+			} else {
+				renderer.SetDrawColor(colorSelectd.R, colorSelectd.G, colorSelectd.B, colorSelectd.A)
+			}
 			renderer.FillRect(&sdl.Rect{
 				X: int32(iPosX + 6),
 				Y: int32(iPosY + 6),
