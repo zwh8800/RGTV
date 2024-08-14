@@ -27,7 +27,7 @@ const (
 const (
 	posX         = 0
 	posY         = 0
-	width        = 240
+	width        = 300
 	height       = 480
 	genreWidth   = 70
 	channelWidth = width - genreWidth
