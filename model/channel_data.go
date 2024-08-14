@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"sort"
 	"strings"
 
 	"github.com/jamesnetherton/m3u"
@@ -23,10 +24,26 @@ type ChannelGroup struct {
 }
 
 type Channel struct {
-	Index  int
-	Name   string
-	Url    string
-	Source string
+	Index   int
+	Name    string
+	Sources []*Source
+}
+
+type Source struct {
+	Name string
+	Url  string
+}
+
+type sortByName []*Source
+
+func (s sortByName) Len() int {
+	return len(s)
+}
+func (s sortByName) Swap(i, j int) {
+	s[i], s[j] = s[j], s[i]
+}
+func (s sortByName) Less(i, j int) bool {
+	return s[i].Name < s[j].Name
 }
 
 func ParseChannelFromDIYP(path string) (*ChannelData, error) {
@@ -53,6 +70,7 @@ func ParseChannelFromDIYP(path string) (*ChannelData, error) {
 	scanner := bufio.NewScanner(f)
 	groupIndex := 1
 	channelIndex := 1
+	channelMap := make(map[string]*Channel)
 	for scanner.Scan() {
 		line := scanner.Text()
 		if strings.Contains(line, ",#genre#") {
@@ -64,7 +82,7 @@ func ParseChannelFromDIYP(path string) (*ChannelData, error) {
 			}
 			name := part[0]
 			url := part[1]
-			source := ""
+			source := "默认线路"
 			part2 := strings.Split(url, "$")
 			if len(part2) == 2 {
 				url = part2[0]
@@ -81,13 +99,21 @@ func ParseChannelFromDIYP(path string) (*ChannelData, error) {
 				group, _ = groups.Get(curGroup)
 				groupIndex++
 			}
-			group.Channels = append(group.Channels, &Channel{
-				Index:  channelIndex,
-				Name:   name,
-				Url:    url,
-				Source: source,
+			channel, ok := channelMap[name]
+			if !ok {
+				channel = &Channel{
+					Index: channelIndex,
+					Name:  name,
+				}
+				channelMap[name] = channel
+				channelIndex++
+			}
+			channel.Sources = append(channel.Sources, &Source{
+				Name: source,
+				Url:  url,
 			})
-			channelIndex++
+
+			group.Channels = append(group.Channels, channel)
 		}
 	}
 	channelData := &ChannelData{
@@ -95,6 +121,9 @@ func ParseChannelFromDIYP(path string) (*ChannelData, error) {
 	}
 	for pair := groups.Oldest(); pair != nil; pair = pair.Next() {
 		channelData.Groups = append(channelData.Groups, pair.Value)
+		for _, channel := range pair.Value.Channels {
+			sort.Sort(sortByName(channel.Sources))
+		}
 	}
 	return channelData, nil
 }
@@ -105,6 +134,8 @@ func ParseChannelFromM3U8(path string) (*ChannelData, error) {
 		return nil, err
 	}
 	groups := orderedmap.New[string, *ChannelGroup]()
+	channelMap := make(map[string]*Channel)
+	channelIndex := 1
 	for _, track := range m.Tracks {
 		groupTitle := getGroupTitle(track)
 		if groupTitle == "" {
@@ -122,17 +153,29 @@ func ParseChannelFromM3U8(path string) (*ChannelData, error) {
 		if name == "" {
 			name = track.Name
 		}
-		group.Channels = append(group.Channels, &Channel{
-			Name:   name,
-			Url:    track.URI,
-			Source: "",
+		channel, ok := channelMap[name]
+		if !ok {
+			channel = &Channel{
+				Index: channelIndex,
+				Name:  name,
+			}
+			channelMap[name] = channel
+			channelIndex++
+		}
+		channel.Sources = append(channel.Sources, &Source{
+			Name: "默认线路",
+			Url:  track.URI,
 		})
+		group.Channels = append(group.Channels, channel)
 	}
 	channelData := &ChannelData{
 		Groups: make([]*ChannelGroup, 0, groups.Len()),
 	}
 	for pair := groups.Oldest(); pair != nil; pair = pair.Next() {
 		channelData.Groups = append(channelData.Groups, pair.Value)
+		for _, channel := range pair.Value.Channels {
+			sort.Sort(sortByName(channel.Sources))
+		}
 	}
 	return channelData, nil
 }

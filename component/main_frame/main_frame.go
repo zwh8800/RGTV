@@ -5,6 +5,7 @@ import (
 	"github.com/zwh8800/RGTV/component"
 	channelinfo "github.com/zwh8800/RGTV/component/channel_info"
 	channellist "github.com/zwh8800/RGTV/component/channel_list"
+	channelsource "github.com/zwh8800/RGTV/component/channel_source"
 	exitmask "github.com/zwh8800/RGTV/component/exit_mask"
 	loadingbar "github.com/zwh8800/RGTV/component/loading_bar"
 	videobox "github.com/zwh8800/RGTV/component/video_box"
@@ -16,12 +17,13 @@ import (
 )
 
 type MainFrame struct {
-	videoBox    *videobox.VideoBox
-	channelList *channellist.ChannelList
-	channelInfo *channelinfo.ChannelInfo
-	volumeBar   *volumebar.VolumeBar
-	exitMask    *exitmask.ExitMask
-	loadingBar  *loadingbar.LoadingBar
+	videoBox      *videobox.VideoBox
+	channelList   *channellist.ChannelList
+	channelInfo   *channelinfo.ChannelInfo
+	volumeBar     *volumebar.VolumeBar
+	exitMask      *exitmask.ExitMask
+	loadingBar    *loadingbar.LoadingBar
+	channelSource *channelsource.ChannelSource
 }
 
 func New() *MainFrame {
@@ -34,7 +36,7 @@ func New() *MainFrame {
 		}
 	}
 
-	videoBox, err := videobox.New(channelData.Groups[0].Channels[0].Url)
+	videoBox, err := videobox.New(channelData.Groups[0].Channels[0].Sources[0].Url)
 	if err != nil {
 		panic(err)
 	}
@@ -54,17 +56,22 @@ func New() *MainFrame {
 
 	loadBar := loadingbar.New()
 
+	channelSource := channelsource.New(channelData.Groups[0].Channels[0])
+
 	m := &MainFrame{
-		videoBox:    videoBox,
-		channelList: channelList,
-		channelInfo: channelInfo,
-		volumeBar:   volumeBar,
-		exitMask:    exitMask,
-		loadingBar:  loadBar,
+		videoBox:      videoBox,
+		channelList:   channelList,
+		channelInfo:   channelInfo,
+		volumeBar:     volumeBar,
+		exitMask:      exitMask,
+		loadingBar:    loadBar,
+		channelSource: channelSource,
 	}
 
-	m.channelList.OnChannelChange(m.OnChannelChange)
+	m.channelList.OnChannelChange(m.onChannelChange)
 	m.channelInfo.Show()
+
+	m.channelSource.OnSourceChange(m.onSourceChange)
 
 	return m
 }
@@ -77,6 +84,10 @@ func (m *MainFrame) HandleEvent(e sdl.Event) {
 			captured = m.hatUp()
 		} else if event.Value&sdl.HAT_DOWN != 0 {
 			captured = m.hatDown()
+		} else if event.Value&sdl.HAT_LEFT != 0 {
+			captured = m.hatLeft()
+		} else if event.Value&sdl.HAT_RIGHT != 0 {
+			captured = m.hatRight()
 		}
 
 	case *sdl.JoyButtonEvent:
@@ -100,6 +111,10 @@ func (m *MainFrame) HandleEvent(e sdl.Event) {
 				captured = m.hatUp()
 			} else if event.Keysym.Sym == sdl.K_DOWN {
 				captured = m.hatDown()
+			} else if event.Keysym.Sym == sdl.K_LEFT {
+				captured = m.hatLeft()
+			} else if event.Keysym.Sym == sdl.K_RIGHT {
+				captured = m.hatRight()
 			} else if event.Keysym.Sym == sdl.K_a {
 				captured = m.buttonA()
 			} else if event.Keysym.Sym == sdl.K_b {
@@ -189,6 +204,30 @@ func (m *MainFrame) hatDown() bool {
 	return true
 }
 
+func (m *MainFrame) hatLeft() bool {
+	if m.channelList.IsShown() {
+		return false
+	}
+	if m.exitMask.IsShown() {
+		return false
+	}
+	m.channelSource.PrevSource()
+
+	return true
+}
+
+func (m *MainFrame) hatRight() bool {
+	if m.channelList.IsShown() {
+		return false
+	}
+	if m.exitMask.IsShown() {
+		return false
+	}
+	m.channelSource.NextSource()
+
+	return true
+}
+
 func (m *MainFrame) buttonVolumeUp() bool {
 	if m.exitMask.IsShown() {
 		return false
@@ -224,11 +263,13 @@ func (m *MainFrame) Dispose() {
 	m.channelInfo.Dispose()
 }
 
-func (m *MainFrame) OnChannelChange(_ any) {
+func (m *MainFrame) onChannelChange(_ any) {
 	_, channel := m.channelList.GetCurChannel()
+	m.channelSource.SetChannel(channel)
+
 	m.videoBox.Dispose()
 	var err error
-	m.videoBox, err = videobox.New(channel.Url)
+	m.videoBox, err = videobox.New(m.channelSource.GetSource().Url)
 	if err != nil {
 		panic(err)
 	}
@@ -241,6 +282,17 @@ func (m *MainFrame) OnChannelChange(_ any) {
 		m.channelInfo.NextProgram = util.GetNextProgram(channel.Name)
 	}()
 	m.channelInfo.Show()
+}
+
+func (m *MainFrame) onSourceChange(_ any) {
+	m.videoBox.Dispose()
+	var err error
+	m.videoBox, err = videobox.New(m.channelSource.GetSource().Url)
+	if err != nil {
+		panic(err)
+	}
+	m.videoBox.SetVolume(m.volumeBar.GetVolume())
+	m.videoBox.OnVideoLag(m.OnVideoLag)
 }
 
 func (m *MainFrame) OnVideoLag(_ any) {

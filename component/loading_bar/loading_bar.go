@@ -15,7 +15,7 @@ import (
 
 const (
 	closeTimeout = 200 * time.Millisecond
-	interval     = 120
+	interval     = 60
 	half         = interval / 2
 	lineLength   = 200
 	linePosY     = 250

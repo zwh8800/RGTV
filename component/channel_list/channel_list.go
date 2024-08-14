@@ -21,7 +21,7 @@ const (
 )
 
 const (
-	channelListCloseTimeout = 10 * time.Second
+	closeTimeout = 10 * time.Second
 )
 
 const (
@@ -105,17 +105,17 @@ func (c *ChannelList) HandleEvent(e sdl.Event) {
 }
 
 func (c *ChannelList) hatLeft() {
-	c.closeTimer.Reset(channelListCloseTimeout)
+	c.closeTimer.Reset(closeTimeout)
 	c.focusOnGenre = true
 }
 
 func (c *ChannelList) hatRight() {
-	c.closeTimer.Reset(channelListCloseTimeout)
+	c.closeTimer.Reset(closeTimeout)
 	c.focusOnGenre = false
 }
 
 func (c *ChannelList) hatUp() {
-	c.closeTimer.Reset(channelListCloseTimeout)
+	c.closeTimer.Reset(closeTimeout)
 	if c.focusOnGenre {
 		c.selectedGroup--
 		c.selectedGroup %= len(c.channelData.Groups)
@@ -132,7 +132,7 @@ func (c *ChannelList) hatUp() {
 }
 
 func (c *ChannelList) hatDown() {
-	c.closeTimer.Reset(channelListCloseTimeout)
+	c.closeTimer.Reset(closeTimeout)
 	if c.focusOnGenre {
 		c.selectedGroup++
 		c.selectedGroup %= len(c.channelData.Groups)
@@ -149,7 +149,7 @@ func (c *ChannelList) hatDown() {
 }
 
 func (c *ChannelList) buttonA() {
-	c.closeTimer.Reset(channelListCloseTimeout)
+	c.closeTimer.Reset(closeTimeout)
 	if c.focusOnGenre {
 		c.focusOnGenre = false
 	} else {
@@ -301,7 +301,7 @@ func (c *ChannelList) Show() {
 	if c.closeTimer != nil {
 		c.closeTimer.Stop()
 	}
-	c.closeTimer = time.AfterFunc(channelListCloseTimeout, func() {
+	c.closeTimer = time.AfterFunc(closeTimeout, func() {
 		c.shown = false
 	})
 }
