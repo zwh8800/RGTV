@@ -115,6 +115,7 @@ func ParseChannelFromDIYP(path string) (*ChannelData, error) {
 					Name:  name,
 				}
 				channelMap[name] = channel
+				group.Channels = append(group.Channels, channel)
 				channelIndex++
 			}
 			channel.Sources = append(channel.Sources, &Source{
@@ -122,7 +123,6 @@ func ParseChannelFromDIYP(path string) (*ChannelData, error) {
 				Url:  url,
 			})
 
-			group.Channels = append(group.Channels, channel)
 		}
 	}
 	channelData := &ChannelData{
@@ -169,13 +169,13 @@ func ParseChannelFromM3U8(path string) (*ChannelData, error) {
 				Name:  name,
 			}
 			channelMap[name] = channel
+			group.Channels = append(group.Channels, channel)
 			channelIndex++
 		}
 		channel.Sources = append(channel.Sources, &Source{
 			Name: "默认线路",
 			Url:  track.URI,
 		})
-		group.Channels = append(group.Channels, channel)
 	}
 	channelData := &ChannelData{
 		Groups: make([]*ChannelGroup, 0, groups.Len()),
