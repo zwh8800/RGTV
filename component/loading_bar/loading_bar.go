@@ -128,6 +128,7 @@ func (c *LoadingBar) drawLine(renderer *sdl.Renderer) {
 		x2 = (640-lineLength)/2 + lineLength
 	}
 
+	renderer.SetDrawColor(255, 255, 255, 255)
 	renderer.DrawLine(int32(x1), linePosY, int32(x2), linePosY)
 }
 

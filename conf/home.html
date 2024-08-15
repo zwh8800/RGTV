@@ -1,0 +1,30 @@
+<html lang="zh-CN">
+<head>
+<title>RGTV配置</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta charset="UTF-8">
+</head>
+<body>
+<h1>RGTV配置</h1>
+<form action="/save" method="post">
+    <p style="color: red; font-size: 32px;">
+        配置修改后，重启应用生效
+    </p>
+    <p>
+        <label>直播源地址：</label>
+        <label>
+            <input type="text" name="live_source_url" value="{{ .LiveSourceUrl }}" placeholder="支持m3u8和dipy格式">
+        </label>
+    </p>
+    <p>
+        <label>节目单地址：</label>
+        <label>
+            <input type="text" name="epg_url" value="{{ .EPGUrl }}" placeholder="仅支持dipy格式">
+        </label>
+    </p>
+    <p>
+        <input type="submit" value="保存">
+    </p>
+</form>
+</body>
+</html>

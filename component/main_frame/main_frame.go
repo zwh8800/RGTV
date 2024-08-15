@@ -12,8 +12,8 @@ import (
 	volumebar "github.com/zwh8800/RGTV/component/volume_bar"
 	"github.com/zwh8800/RGTV/conf"
 	"github.com/zwh8800/RGTV/consts"
+	"github.com/zwh8800/RGTV/epg"
 	"github.com/zwh8800/RGTV/model"
-	"github.com/zwh8800/RGTV/util"
 )
 
 type MainFrame struct {
@@ -32,7 +32,7 @@ func New() *MainFrame {
 	if err != nil {
 		channelData, err = model.ParseChannelFromDIYP(url)
 		if err != nil {
-			panic(err)
+			channelData = model.DefaultChannelData
 		}
 	}
 
@@ -46,8 +46,8 @@ func New() *MainFrame {
 	channelInfo.ChannelNumber = 1
 	channelInfo.ChannelName = channelData.Groups[0].Channels[0].Name
 	go func() {
-		channelInfo.CurrentProgram = util.GetCurrentProgram(channelInfo.ChannelName)
-		channelInfo.NextProgram = util.GetNextProgram(channelInfo.ChannelName)
+		channelInfo.CurrentProgram = epg.GetCurrentProgram(channelInfo.ChannelName)
+		channelInfo.NextProgram = epg.GetNextProgram(channelInfo.ChannelName)
 	}()
 
 	volumeBar := volumebar.New()
@@ -98,6 +98,8 @@ func (m *MainFrame) HandleEvent(e sdl.Event) {
 				captured = m.buttonB()
 			} else if event.Button == consts.ButtonX {
 				captured = m.buttonX()
+			} else if event.Button == consts.ButtonY {
+				captured = m.buttonY()
 			} else if event.Button == consts.ButtonVolumeUp {
 				captured = m.buttonVolumeUp()
 			} else if event.Button == consts.ButtonVolumeDown {
@@ -121,6 +123,8 @@ func (m *MainFrame) HandleEvent(e sdl.Event) {
 				captured = m.buttonB()
 			} else if event.Keysym.Sym == sdl.K_x {
 				captured = m.buttonX()
+			} else if event.Keysym.Sym == sdl.K_y {
+				captured = m.buttonY()
 			} else if event.Keysym.Sym == sdl.K_u {
 				captured = m.buttonVolumeUp()
 			} else if event.Keysym.Sym == sdl.K_d {
@@ -174,6 +178,18 @@ func (m *MainFrame) buttonX() bool {
 		return false
 	}
 	m.channelInfo.Show()
+	return true
+}
+
+func (m *MainFrame) buttonY() bool {
+	if m.channelList.IsShown() {
+		return false
+	}
+	if m.exitMask.IsShown() {
+		return false
+	}
+	// TODO: 实现扫码配置
+	conf.StartNetConfServer()
 	return true
 }
 
@@ -282,8 +298,8 @@ func (m *MainFrame) onChannelChange(_ any) {
 	m.channelInfo.ChannelNumber = channel.Index
 	m.channelInfo.ChannelName = channel.Name
 	go func() {
-		m.channelInfo.CurrentProgram = util.GetCurrentProgram(channel.Name)
-		m.channelInfo.NextProgram = util.GetNextProgram(channel.Name)
+		m.channelInfo.CurrentProgram = epg.GetCurrentProgram(channel.Name)
+		m.channelInfo.NextProgram = epg.GetNextProgram(channel.Name)
 	}()
 	m.channelInfo.Show()
 }

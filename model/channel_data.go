@@ -8,9 +8,10 @@ import (
 	"os"
 	"sort"
 	"strings"
+	"time"
 
-	"github.com/jamesnetherton/m3u"
 	orderedmap "github.com/wk8/go-ordered-map/v2"
+	"github.com/zwh8800/RGTV/util/m3u"
 )
 
 const (
@@ -55,11 +56,39 @@ func (s sortByName) Less(i, j int) bool {
 	return s[i].Name < s[j].Name
 }
 
+var (
+	DefaultChannelData = &ChannelData{
+		Groups: []*ChannelGroup{
+			{
+				Name: "无数据",
+				Channels: []*Channel{
+					{
+						Index: 1,
+						Name:  "无频道",
+						Sources: []*Source{
+							{
+								Name: "默认线路",
+								Url:  "",
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+)
+
 func ParseChannelFromDIYP(path string) (*ChannelData, error) {
+	if path == "" {
+		return nil, fmt.Errorf("path is empty")
+	}
 	var f io.ReadCloser
 
 	if strings.HasPrefix(path, "http://") || strings.HasPrefix(path, "https://") {
-		data, err := http.Get(path)
+		cli := http.Client{
+			Timeout: 10 * time.Second,
+		}
+		data, err := cli.Get(path)
 		if err != nil {
 			return nil, fmt.Errorf("unable to open playlist URL: %v", err)
 		}
@@ -138,7 +167,7 @@ func ParseChannelFromDIYP(path string) (*ChannelData, error) {
 }
 
 func ParseChannelFromM3U8(path string) (*ChannelData, error) {
-	m, err := m3u.Parse(path)
+	m, err := m3u.ParseM3U(path)
 	if err != nil {
 		return nil, err
 	}

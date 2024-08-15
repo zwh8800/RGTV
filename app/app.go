@@ -6,7 +6,6 @@ import (
 	"github.com/veandco/go-sdl2/sdl"
 	"github.com/zwh8800/RGTV/component"
 	mainframe "github.com/zwh8800/RGTV/component/main_frame"
-	"github.com/zwh8800/RGTV/conf"
 	"github.com/zwh8800/RGTV/util"
 )
 
@@ -31,7 +30,7 @@ func NewApp() (*App, error) {
 	fmt.Printf("joystick: %#v\n", joystick)
 
 	window, err := sdl.CreateWindow("RGTV", sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED,
-		conf.GetConfig().ResX, conf.GetConfig().ResY, sdl.WINDOW_SHOWN)
+		640, 480, sdl.WINDOW_SHOWN)
 	if err != nil {
 		return nil, err
 	}
