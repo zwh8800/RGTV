@@ -3,27 +3,59 @@
 <title>RGTV配置</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <meta charset="UTF-8">
+<style type="text/css">
+.form_item {
+    font-size: 1rem;
+    align-items: center;
+}
+.form_control {
+    height: 3rem;
+    width: 100%;
+    padding: 0.175rem 0.75rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #212529;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid #ced4da;
+    border-radius: 0.25rem;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    margin-bottom: 0.2rem;
+}
+.form_control:focus {
+    border-color: #80bdff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+.btn {
+    color: #fff;
+    background-color: #007bff;
+    border: none;
+    border-radius: 0.25rem;
+    height: 3rem;
+    width: 100%;
+    font-size: 1.5rem;
+}
+  
+.btn:hover {
+    color: #fff;
+    background-color: #0069d9;
+}   
+</style>
 </head>
 <body>
-<h1>RGTV配置</h1>
+<h1 style="text-align: center;">RGTV配置</h1>
 <form action="/save" method="post">
-    <p style="color: red; font-size: 32px;">
-        配置修改后，重启应用生效
+    <p class="form_item">
+        <label for="live_source_url">直播源地址：</label>
+        <input id="live_source_url" class="form_control" type="text" name="live_source_url" value="{{ .LiveSourceUrl }}" placeholder="支持m3u8和dipy格式">
     </p>
-    <p>
-        <label>直播源地址：</label>
-        <label>
-            <input type="text" name="live_source_url" value="{{ .LiveSourceUrl }}" placeholder="支持m3u8和dipy格式">
-        </label>
+    <p class="form_item">
+        <label for="epg_url">节目单地址：</label>
+        <input id="epg_url" class="form_control" type="text" name="epg_url" value="{{ .EPGUrl }}" placeholder="仅支持dipy格式">
     </p>
-    <p>
-        <label>节目单地址：</label>
-        <label>
-            <input type="text" name="epg_url" value="{{ .EPGUrl }}" placeholder="仅支持dipy格式">
-        </label>
-    </p>
-    <p>
-        <input type="submit" value="保存">
+    <p style="text-align: center;">
+        <button type="submit" class="btn">保存</button>
+        <span style="color: red; font-size: 1rem;">配置修改后，重启应用生效!</span>
     </p>
 </form>
 </body>

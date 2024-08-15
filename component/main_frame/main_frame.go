@@ -6,6 +6,7 @@ import (
 	channelinfo "github.com/zwh8800/RGTV/component/channel_info"
 	channellist "github.com/zwh8800/RGTV/component/channel_list"
 	channelsource "github.com/zwh8800/RGTV/component/channel_source"
+	confqrcode "github.com/zwh8800/RGTV/component/conf_qrcode"
 	exitmask "github.com/zwh8800/RGTV/component/exit_mask"
 	loadingbar "github.com/zwh8800/RGTV/component/loading_bar"
 	videobox "github.com/zwh8800/RGTV/component/video_box"
@@ -24,6 +25,7 @@ type MainFrame struct {
 	exitMask      *exitmask.ExitMask
 	loadingBar    *loadingbar.LoadingBar
 	channelSource *channelsource.ChannelSource
+	confQrcode    *confqrcode.ConfQrcode
 }
 
 func New() *MainFrame {
@@ -58,6 +60,8 @@ func New() *MainFrame {
 
 	channelSource := channelsource.New(channelData.Groups[0].Channels[0])
 
+	confQrcode := confqrcode.New()
+
 	m := &MainFrame{
 		videoBox:      videoBox,
 		channelList:   channelList,
@@ -66,6 +70,7 @@ func New() *MainFrame {
 		exitMask:      exitMask,
 		loadingBar:    loadBar,
 		channelSource: channelSource,
+		confQrcode:    confQrcode,
 	}
 
 	m.channelList.OnChannelChange(m.onChannelChange)
@@ -144,6 +149,7 @@ func (m *MainFrame) HandleEvent(e sdl.Event) {
 	m.exitMask.HandleEvent(e)
 	m.loadingBar.HandleEvent(e)
 	m.channelSource.HandleEvent(e)
+	m.confQrcode.HandleEvent(e)
 }
 
 func (m *MainFrame) buttonA() bool {
@@ -151,6 +157,9 @@ func (m *MainFrame) buttonA() bool {
 		return false
 	}
 	if m.exitMask.IsShown() {
+		return false
+	}
+	if m.confQrcode.IsShown() {
 		return false
 	}
 	m.channelList.Show()
@@ -165,6 +174,9 @@ func (m *MainFrame) buttonB() bool {
 	if m.exitMask.IsShown() {
 		return false
 	}
+	if m.confQrcode.IsShown() {
+		return false
+	}
 	m.exitMask.Show()
 	m.channelInfo.Hide()
 	return true
@@ -175,6 +187,9 @@ func (m *MainFrame) buttonX() bool {
 		return false
 	}
 	if m.exitMask.IsShown() {
+		return false
+	}
+	if m.confQrcode.IsShown() {
 		return false
 	}
 	m.channelInfo.Show()
@@ -188,8 +203,10 @@ func (m *MainFrame) buttonY() bool {
 	if m.exitMask.IsShown() {
 		return false
 	}
-	// TODO: 实现扫码配置
-	conf.StartNetConfServer()
+	if m.confQrcode.IsShown() {
+		return false
+	}
+	m.confQrcode.Show()
 	return true
 }
 
@@ -274,6 +291,7 @@ func (m *MainFrame) Draw(renderer *sdl.Renderer) {
 	m.exitMask.Draw(renderer)
 	m.loadingBar.Draw(renderer)
 	m.channelSource.Draw(renderer)
+	m.confQrcode.Draw(renderer)
 	renderer.Present()
 }
 
