@@ -1,5 +1,7 @@
 #!/bin/bash
 
+rm -rf build
+
 mkdir -p build/RGTV
 mkdir -p build/Img
 
