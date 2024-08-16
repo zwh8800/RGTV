@@ -31,7 +31,7 @@
 
 ### 下载链接
 
-- [Github下载](https://github.com/zwh8800/RGTV/releases/download/v1.0.0/RGTV.zip)
+- [Github下载](https://github.com/zwh8800/RGTV/releases/download/v0.1.0/RGTV.zip)
 - [百度网盘下载](https://github.com/zwh8800/RGTV/releases/download/v1.0.0/RGTV.tar.gz)
 
 ### 安装
