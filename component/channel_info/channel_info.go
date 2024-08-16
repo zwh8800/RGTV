@@ -141,7 +141,7 @@ func (c *ChannelInfo) drawNextProgram(renderer *sdl.Renderer, textDrawer *text.D
 }
 
 func (c *ChannelInfo) drawHelp(renderer *sdl.Renderer, textDrawer *text.Drawer) {
-	txt := "▲▼：换台  ◁▷：换源  A：列表  B：退出  X：屏显"
+	txt := "▲▼：换台 ◁▷：换源 A：列表 B：退出 X：屏显 Y：设置"
 
 	img, err := textDrawer.Draw(txt, 12, image.White)
 	if err != nil {

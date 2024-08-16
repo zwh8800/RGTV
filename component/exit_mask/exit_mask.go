@@ -1,7 +1,9 @@
 package exit_mask
 
 import (
+	"bytes"
 	"image"
+	"image/png"
 	"time"
 
 	"github.com/veandco/go-sdl2/sdl"
@@ -19,14 +21,24 @@ const (
 type ExitMask struct {
 	shown      bool
 	closeTimer *time.Timer
+
+	logoImg *image.RGBA
 }
 
 func New() *ExitMask {
-	return &ExitMask{}
+	img, err := png.Decode(bytes.NewReader(embeddata.LogoData))
+	if err != nil {
+		panic(err)
+	}
+	logoImg := util.ImageToRGBA(img)
+
+	return &ExitMask{
+		logoImg: logoImg,
+	}
 }
 
-func (em *ExitMask) HandleEvent(e sdl.Event) {
-	if !em.shown {
+func (c *ExitMask) HandleEvent(e sdl.Event) {
+	if !c.shown {
 		return
 	}
 
@@ -34,25 +46,25 @@ func (em *ExitMask) HandleEvent(e sdl.Event) {
 	case *sdl.JoyButtonEvent:
 		if event.State == sdl.RELEASED {
 			if event.Button == consts.ButtonA {
-				em.buttonA()
+				c.buttonA()
 			} else if event.Button == consts.ButtonB {
-				em.buttonB()
+				c.buttonB()
 			}
 		}
 
 	case *sdl.KeyboardEvent:
 		if event.Type == sdl.KEYUP {
 			if event.Keysym.Sym == sdl.K_a {
-				em.buttonA()
+				c.buttonA()
 			} else if event.Keysym.Sym == sdl.K_b {
-				em.buttonB()
+				c.buttonB()
 			}
 		}
 	}
 }
 
-func (em *ExitMask) Draw(renderer *sdl.Renderer) {
-	if !em.shown {
+func (c *ExitMask) Draw(renderer *sdl.Renderer) {
+	if !c.shown {
 		return
 	}
 	renderer.SetDrawBlendMode(sdl.BLENDMODE_BLEND)
@@ -76,18 +88,29 @@ func (em *ExitMask) Draw(renderer *sdl.Renderer) {
 		panic(err)
 	}
 
-	em.drawExitMsg(renderer, textDrawer)
-	em.drawExitButton(renderer, textDrawer)
+	c.drawLogo(renderer)
+	c.drawExitMsg(renderer, textDrawer)
+	c.drawExitButton(renderer, textDrawer)
 }
 
-func (em *ExitMask) drawExitMsg(renderer *sdl.Renderer, textDrawer *text.Drawer) {
-	img, err := textDrawer.Draw("是否要退出RGTV", 64, image.White)
+func (c *ExitMask) drawLogo(render *sdl.Renderer) {
+	util.DrawGoImage(render, c.logoImg,
+		image.Rect(
+			(640-c.logoImg.Bounds().Dx())/2,
+			(480-c.logoImg.Bounds().Dy())/2,
+			(640-c.logoImg.Bounds().Dx())/2+c.logoImg.Bounds().Dx(),
+			(480-c.logoImg.Bounds().Dy())/2+c.logoImg.Bounds().Dy(),
+		))
+}
+
+func (c *ExitMask) drawExitMsg(renderer *sdl.Renderer, textDrawer *text.Drawer) {
+	img, err := textDrawer.Draw("是否要退出RGTV", 48, image.White)
 	if err != nil {
 		panic(err)
 	}
 
 	x := (640 - img.Bounds().Dx()) / 2
-	y := (480-img.Bounds().Dy())/2 - 40
+	y := (480-img.Bounds().Dy())/2 + 120
 
 	util.DrawGoImage(renderer, img,
 		image.Rect(
@@ -98,14 +121,14 @@ func (em *ExitMask) drawExitMsg(renderer *sdl.Renderer, textDrawer *text.Drawer)
 		))
 }
 
-func (em *ExitMask) drawExitButton(renderer *sdl.Renderer, textDrawer *text.Drawer) {
-	img, err := textDrawer.Draw("A：确认  B：取消", 48, image.White)
+func (c *ExitMask) drawExitButton(renderer *sdl.Renderer, textDrawer *text.Drawer) {
+	img, err := textDrawer.Draw("A：确认  B：取消", 32, image.White)
 	if err != nil {
 		panic(err)
 	}
 
 	x := (640 - img.Bounds().Dx()) / 2
-	y := (480-img.Bounds().Dy())/2 + 60
+	y := (480-img.Bounds().Dy())/2 + 200
 
 	util.DrawGoImage(renderer, img,
 		image.Rect(
@@ -116,35 +139,35 @@ func (em *ExitMask) drawExitButton(renderer *sdl.Renderer, textDrawer *text.Draw
 		))
 }
 
-func (em *ExitMask) Dispose() {}
+func (c *ExitMask) Dispose() {}
 
-func (em *ExitMask) Show() {
-	em.shown = true
-	if em.closeTimer != nil {
-		em.closeTimer.Stop()
+func (c *ExitMask) Show() {
+	c.shown = true
+	if c.closeTimer != nil {
+		c.closeTimer.Stop()
 	}
-	em.closeTimer = time.AfterFunc(closeTimeout, func() {
-		em.shown = false
+	c.closeTimer = time.AfterFunc(closeTimeout, func() {
+		c.shown = false
 	})
 }
 
-func (em *ExitMask) Hide() {
-	em.shown = false
+func (c *ExitMask) Hide() {
+	c.shown = false
 }
 
-func (em *ExitMask) IsShown() bool {
-	return em.shown
+func (c *ExitMask) IsShown() bool {
+	return c.shown
 }
 
-func (em *ExitMask) buttonA() {
+func (c *ExitMask) buttonA() {
 	sdl.PushEvent(&sdl.QuitEvent{
 		Type:      sdl.QUIT,
 		Timestamp: sdl.GetTicks(),
 	})
 }
 
-func (em *ExitMask) buttonB() {
-	em.Hide()
+func (c *ExitMask) buttonB() {
+	c.Hide()
 }
 
 var _ component.Component = (*ExitMask)(nil)

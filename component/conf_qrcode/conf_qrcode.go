@@ -2,15 +2,15 @@ package conf_qrcode
 
 import (
 	"fmt"
-	"image"
-	"image/draw"
-
 	"github.com/skip2/go-qrcode"
 	"github.com/veandco/go-sdl2/sdl"
 	"github.com/zwh8800/RGTV/component"
 	"github.com/zwh8800/RGTV/conf"
 	"github.com/zwh8800/RGTV/consts"
+	"github.com/zwh8800/RGTV/embeddata"
+	"github.com/zwh8800/RGTV/text"
 	"github.com/zwh8800/RGTV/util"
+	"image"
 )
 
 const (
@@ -33,7 +33,7 @@ func New() *ConfQrcode {
 	img := q.Image(size)
 
 	return &ConfQrcode{
-		img: imageToRGBA(img),
+		img: util.ImageToRGBA(img),
 	}
 }
 
@@ -80,6 +80,27 @@ func (c *ConfQrcode) Draw(renderer *sdl.Renderer) {
 			x+size,
 			y+size,
 		))
+
+	textDrawer, err := text.GetDrawerFromData(embeddata.FontName, embeddata.FontData)
+	if err != nil {
+		panic(err)
+	}
+
+	img, err := textDrawer.Draw("请使用手机扫码进行配置", 32, image.White)
+	if err != nil {
+		panic(err)
+	}
+
+	x = (640 - img.Bounds().Dx()) / 2
+	y = 400
+
+	util.DrawGoImage(renderer, img,
+		image.Rect(
+			x,
+			y,
+			x+img.Bounds().Dx(),
+			y+img.Bounds().Dy(),
+		))
 }
 
 func (c *ConfQrcode) Dispose() {}
@@ -99,14 +120,6 @@ func (c *ConfQrcode) Hide() {
 
 func (c *ConfQrcode) IsShown() bool {
 	return c.shown
-}
-
-// imageToRGBA 将image.Image转换为image.RGBA
-func imageToRGBA(img image.Image) *image.RGBA {
-	bounds := img.Bounds()
-	rgba := image.NewRGBA(bounds)
-	draw.Draw(rgba, bounds, img, bounds.Min, draw.Src)
-	return rgba
 }
 
 var _ component.Component = (*ConfQrcode)(nil)

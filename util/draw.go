@@ -2,6 +2,7 @@ package util
 
 import (
 	"image"
+	"image/draw"
 	"unsafe"
 
 	"github.com/veandco/go-sdl2/sdl"
@@ -36,4 +37,12 @@ func DrawGoImage(renderer *sdl.Renderer, img *image.RGBA, rectangle image.Rectan
 	}
 
 	return nil
+}
+
+// ImageToRGBA 将image.Image转换为image.RGBA
+func ImageToRGBA(img image.Image) *image.RGBA {
+	bounds := img.Bounds()
+	rgba := image.NewRGBA(bounds)
+	draw.Draw(rgba, bounds, img, bounds.Min, draw.Src)
+	return rgba
 }
