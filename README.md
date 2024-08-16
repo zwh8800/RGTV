@@ -5,17 +5,17 @@
 ## 截图
 
 <center>
-<img width="100" hspace="5" vspace="5" src="https://raw.githubusercontent.com/zwh8800/RGTV/master/screenshots/1.png" >
+<img width="100" hspace="5" vspace="5" src="https://raw.githubusercontent.com/zwh8800/RGTV/master/screenshots/1.jpg" >
 </center>
 <center>节目详情</center>
 
 <center>
-<img width="100" hspace="5" vspace="5" src="https://raw.githubusercontent.com/zwh8800/RGTV/master/screenshots/2.png" >
+<img width="100" hspace="5" vspace="5" src="https://raw.githubusercontent.com/zwh8800/RGTV/master/screenshots/2.jpg" >
 </center>
 <center>节目列表</center>
 
 <center>
-<img width="100" hspace="5" vspace="5" src="https://raw.githubusercontent.com/zwh8800/RGTV/master/screenshots/3.png" >
+<img width="100" hspace="5" vspace="5" src="https://raw.githubusercontent.com/zwh8800/RGTV/master/screenshots/3.jpg" >
 </center>
 <center>扫码配置</center>
 
