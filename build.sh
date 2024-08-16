@@ -13,5 +13,5 @@ cp RGTV.sh build/
 cp RGTV.png build/Img
 
 cd build
-zip RGTV.zip *
+zip -r RGTV.zip *
 tar zcvf RGTV.tar.gz *
