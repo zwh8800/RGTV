@@ -16,6 +16,8 @@ import (
 
 const (
 	closeTimeout = 10 * time.Second
+
+	logoSize = 144
 )
 
 type ExitMask struct {
@@ -68,7 +70,7 @@ func (c *ExitMask) Draw(renderer *sdl.Renderer) {
 		return
 	}
 	renderer.SetDrawBlendMode(sdl.BLENDMODE_BLEND)
-	renderer.SetDrawColor(0, 0, 0, 128)
+	renderer.SetDrawColor(0, 0, 0, 180)
 	renderer.FillRect(&sdl.Rect{
 		X: 0,
 		Y: 0,
@@ -96,15 +98,15 @@ func (c *ExitMask) Draw(renderer *sdl.Renderer) {
 func (c *ExitMask) drawLogo(render *sdl.Renderer) {
 	util.DrawGoImage(render, c.logoImg,
 		image.Rect(
-			(640-c.logoImg.Bounds().Dx())/2,
-			(480-c.logoImg.Bounds().Dy())/2,
-			(640-c.logoImg.Bounds().Dx())/2+c.logoImg.Bounds().Dx(),
-			(480-c.logoImg.Bounds().Dy())/2+c.logoImg.Bounds().Dy(),
+			(640-logoSize)/2,
+			(480-logoSize)/2,
+			(640-logoSize)/2+logoSize,
+			(480-logoSize)/2+logoSize,
 		))
 }
 
 func (c *ExitMask) drawExitMsg(renderer *sdl.Renderer, textDrawer *text.Drawer) {
-	img, err := textDrawer.Draw("是否要退出RGTV", 48, image.White)
+	img, err := textDrawer.Draw("是否要退出RGTV", 32, image.White)
 	if err != nil {
 		panic(err)
 	}
@@ -122,13 +124,13 @@ func (c *ExitMask) drawExitMsg(renderer *sdl.Renderer, textDrawer *text.Drawer) 
 }
 
 func (c *ExitMask) drawExitButton(renderer *sdl.Renderer, textDrawer *text.Drawer) {
-	img, err := textDrawer.Draw("A：确认  B：取消", 32, image.White)
+	img, err := textDrawer.Draw("A：确认  B：取消", 24, image.White)
 	if err != nil {
 		panic(err)
 	}
 
 	x := (640 - img.Bounds().Dx()) / 2
-	y := (480-img.Bounds().Dy())/2 + 200
+	y := (480-img.Bounds().Dy())/2 + 160
 
 	util.DrawGoImage(renderer, img,
 		image.Rect(
