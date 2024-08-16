@@ -14,4 +14,3 @@ cp ./embeddata/RGTV.png build/Imgs
 
 cd build
 zip -r RGTV.zip *
-tar zcvf RGTV.tar.gz *
